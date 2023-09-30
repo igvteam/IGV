@@ -30,6 +30,7 @@
 package org.broad.igv.ui.action;
 
 import org.broad.igv.Globals;
+import org.broad.igv.drs.TerraResolver;
 import org.broad.igv.logging.*;
 import org.broad.igv.feature.genome.GenomeManager;
 import org.broad.igv.util.GoogleUtils;
@@ -83,6 +84,11 @@ public class LoadFromURLMenuAction extends MenuAction {
 
                     String[] inputs = Globals.whitespacePattern.split(inputURLs.trim());
                     checkURLs(inputs);
+
+                    if(inputs[0].startsWith("drs:")) {
+                        System.out.println(TerraResolver.resolve(inputs[0]));
+                        return;
+                    }
                     if (inputs.length == 1 && SessionReader.isSessionFile(inputs[0])) {
                         // Session URL
                         String url = inputs[0];
