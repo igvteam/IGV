@@ -139,6 +139,7 @@ public class HubTrackSelectionDialog extends JDialog {
         trackContainer.setLayout(wrapLayout);
 
         container.add(trackContainer);
+        int count = 0;
         for (TrackConfig trackConfig : configGroup.tracks) {
 
             JPanel p = new JPanel();
@@ -155,6 +156,9 @@ public class HubTrackSelectionDialog extends JDialog {
             p.add(label);
             p.add(Box.createRigidArea(TRACK_SPACER));
             trackContainer.add(p);
+
+            count++;
+            if(count > 50) break;
         }
 
         return container;

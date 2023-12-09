@@ -32,26 +32,14 @@ public class Hub {
         // Load stanzas
         List<Stanza> stanzas = loadStanzas(url);
 
-        // Validation checks
-        if (stanzas.size() < 2) {
-            throw new RuntimeException("Expected at least 2 stanzas, hub and genome");
-        }
-        if (!"hub".equals(stanzas.get(0).type)) {
-            throw new RuntimeException("Unexpected hub.txt file -- does the first line start with 'hub'?");
-        }
-        if (!"on".equals(stanzas.get(0).getProperty("useOneFile"))) {
-            throw new RuntimeException("Only 'useOneFile' hubs are currently supported");
-        }
-        if (!"genome".equals(stanzas.get(1).type)) {
-            throw new RuntimeException("Unexpected hub file -- expected 'genome' stanza but found " + stanzas.get(1).type);
-        }
-
         // Load groups
         List<Stanza> groups = null;
-        Stanza genomeStanza = stanzas.get(1);
-        if (genomeStanza.hasProperty("groups")) {
-            String groupsTxtURL = baseURL + genomeStanza.getProperty("groups");
-            groups = loadStanzas(groupsTxtURL);
+        if(stanzas.size() > 1) {
+            Stanza genomeStanza = stanzas.get(1);
+            if (genomeStanza.hasProperty("groups")) {
+                String groupsTxtURL = baseURL + genomeStanza.getProperty("groups");
+                groups = loadStanzas(groupsTxtURL);
+            }
         }
 
         // load includes.  Nested includes are not supported
@@ -67,7 +55,7 @@ public class Hub {
         return new Hub(url, stanzas, groups);
     }
 
-    private Hub(String url, List<Stanza> stanzas, List<Stanza> groupStanzas) {
+    private Hub(String url, List<Stanza> stanzas, List<Stanza> groupStanzas) throws IOException {
 
         this.url = url;
 
@@ -75,43 +63,55 @@ public class Hub {
         String baseURL = url.substring(0, idx + 1);
         this.baseURL = baseURL;
 
-        if (stanzas.size() < 2) {
-            throw new RuntimeException("Expected at least 2 stanzas, hub and genome");
-        }
         // The first stanza must be type = hub
         if ("hub".equals(stanzas.get(0).type)) {
             this.hub = stanzas.get(0);
         } else {
             throw new RuntimeException("Unexpected hub.txt file -- does the first line start with 'hub'?");
         }
-        if (!"on".equals(this.hub.getProperty("useOneFile"))) {
-            throw new RuntimeException("Only 'useOneFile' hubs are currently supported");
-        }
 
-
-        // The second stanza should be a genome
-        if ("genome".equals(stanzas.get(1).type)) {
-            this.genomeStanza = stanzas.get(1);
-        } else {
-            throw new RuntimeException("Unexpected hub file -- expected 'genome' stanza but found " + stanzas.get(1).type);
-        }
-
-        // Remaining stanzas should be tracks
-        this.trackStanzas = new ArrayList<>();
-        for (int i = 2; i < stanzas.size(); i++) {
-            if ("track".equals(stanzas.get(i).type)) {
-                this.trackStanzas.add(stanzas.get(i));
+        boolean useOneFile = "on".equals(this.hub.getProperty("useOneFile"));
+        if (useOneFile) {
+            // The second stanza should be a genome
+            if (stanzas.size() < 2) {
+                throw new RuntimeException("Expected at least 2 stanzas, hub and genome");
             }
-        }
+            if ("genome".equals(stanzas.get(1).type)) {
+                this.genomeStanza = stanzas.get(1);
+            } else {
+                throw new RuntimeException("Unexpected hub file -- expected 'genome' stanza but found " + stanzas.get(1).type);
+            }
 
-        if (groupStanzas != null) {
-            this.groupStanzas = groupStanzas;
-            this.groupPriorityMap = new HashMap<>();
-            for (Stanza g : groupStanzas) {
-                if (g.hasProperty("priority")) {
-                    this.groupPriorityMap.put(g.getProperty("name"), Integer.parseInt(g.getProperty("priority")) * 10);
+            // Remaining stanzas should be tracks
+            this.trackStanzas = new ArrayList<>();
+            for (int i = 2; i < stanzas.size(); i++) {
+                if ("track".equals(stanzas.get(i).type)) {
+                    this.trackStanzas.add(stanzas.get(i));
                 }
             }
+
+            if (groupStanzas != null) {
+                this.groupStanzas = groupStanzas;
+                this.groupPriorityMap = new HashMap<>();
+                for (Stanza g : groupStanzas) {
+                    if (g.hasProperty("priority")) {
+                        this.groupPriorityMap.put(g.getProperty("name"), Integer.parseInt(g.getProperty("priority")) * 10);
+                    }
+                }
+            }
+        } else {
+            String genomesFile = stanzas.get(0).getProperty("genomesFile");
+            if (genomesFile == null) {
+                throw new RuntimeException("Either 'useOneFile' or 'genomeFile' property is required");
+            }
+            List<Stanza> genomeFileStanzas = loadStanzas(this.baseURL + genomesFile);
+            if (genomeFileStanzas.size() > 1) {
+                throw new RuntimeException("Multiple genome track hubs are not supported");
+            }
+            this.genomeStanza = genomeFileStanzas.get(0);
+
+            String trackDBFile = genomeStanza.getProperty("trackDb");
+            this.trackStanzas = loadStanzas(this.baseURL + trackDBFile);
         }
     }
 
@@ -123,6 +123,7 @@ public class Hub {
         try (BufferedReader br = ParsingUtils.openBufferedReader(url)) {
             String line;
             while ((line = br.readLine()) != null) {
+
 
                 int indent = indentLevel(line);
                 int i = line.indexOf(" ", indent);
@@ -184,13 +185,15 @@ public class Hub {
         } else if (this.genomeStanza.hasProperty("description")) {
             config.name = this.genomeStanza.getProperty("description");
         }
-        if(config.name == null) {
+        if (config.name == null) {
             config.name = config.id;
         } else {
             config.name += " (" + config.id + ")";
         }
 
-        config.twoBitURL = this.baseURL + this.genomeStanza.getProperty("twoBitPath");
+        if (this.genomeStanza.hasProperty("twoBitPath")) {
+            config.twoBitURL = this.baseURL + this.genomeStanza.getProperty("twoBitPath");
+        }
         config.nameSet = "ucsc";
         config.wholeGenomeView = false;
 
@@ -335,7 +338,7 @@ public class Hub {
             config.description = t.getProperty("longLabel");
         }
 
-        if(t.hasProperty("html")) {
+        if (t.hasProperty("html")) {
             config.html = this.baseURL + t.getProperty("html");
         }
 
