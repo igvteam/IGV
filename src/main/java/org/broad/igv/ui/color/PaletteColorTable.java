@@ -45,19 +45,19 @@ public class PaletteColorTable implements ColorTable {
     Color defaultColor;
 
     public PaletteColorTable() {
-        colorMap = new LinkedHashMap();
+        colorMap = new LinkedHashMap<>();
     }
 
     public PaletteColorTable(Color defaultColor) {
         this.defaultColor = defaultColor;
-        colorMap = new LinkedHashMap();
+        colorMap = new LinkedHashMap<>();
     }
 
     public PaletteColorTable(ColorPalette palette) {
         if (palette != null) {
-            this.colors = palette.getColors();
+            this.colors = palette.colors();
         }
-        colorMap = new LinkedHashMap();
+        colorMap = new LinkedHashMap<>();
     }
 
     public void put(String key, Color c) {

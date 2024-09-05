@@ -56,6 +56,11 @@ public class HeatmapLegendPanel extends LegendPanel {
 
     private Orientation orientation = Orientation.HORIZONTAL;
     private TrackType type;
+
+    public ContinuousColorScale getColorScale() {
+        return colorScale;
+    }
+
     protected ContinuousColorScale colorScale;
 
 

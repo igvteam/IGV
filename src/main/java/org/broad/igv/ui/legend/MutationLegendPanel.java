@@ -73,10 +73,9 @@ public class MutationLegendPanel extends LegendPanel {
         repaint();
     }
 
-    protected ColorScale getColorScale() {
-
-        // TODO Refactor the base class this empty method is not needed
-        return null;
+    @Override
+    public PaletteColorTable getColorScale() {
+        return colorTable;
     }
 
     @Override

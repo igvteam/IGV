@@ -2,8 +2,6 @@ package org.broad.igv.sam;
 
 import htsjdk.samtools.SAMTag;
 import org.broad.igv.Globals;
-import org.broad.igv.event.AlignmentTrackEvent;
-import org.broad.igv.event.IGVEventBus;
 import org.broad.igv.feature.Range;
 import org.broad.igv.feature.Strand;
 import org.broad.igv.jbrowse.CircularViewUtilities;
@@ -114,8 +112,6 @@ class AlignmentTrackMenu extends IGVPopupMenu {
         misMatchesItem.addActionListener(new Deselector(misMatchesItem, showAllItem));
         showAllItem.addActionListener(new Deselector(showAllItem, misMatchesItem));
 
-        // Duplicates
-        addDuplicatesMenuItem();
 
         // Hide small indels
         JMenuItem smallIndelsItem = new JCheckBoxMenuItem("Hide small indels");
@@ -201,31 +197,6 @@ class AlignmentTrackMenu extends IGVPopupMenu {
         // Show alignments, coverage, splice junctions
         addSeparator();
         addShowItems();
-    }
-
-    private void addDuplicatesMenuItem() {
-        JMenu duplicatesMenu = new JMenu("Duplicates");
-        for (AlignmentTrack.DuplicatesOption option : AlignmentTrack.DuplicatesOption.values()) {
-            JRadioButtonMenuItem mi = new JRadioButtonMenuItem(option.label);
-            final AlignmentTrack.DuplicatesOption previous = renderOptions.getDuplicatesOption();
-            mi.setSelected(previous == option);
-            mi.addActionListener(aEvt -> {
-                renderOptions.setDuplicatesOption(option);
-                if(previous != option) {
-                    if (previous.filtered != option.filtered){
-                        // duplicates are filtered out when loading the read data so a reload has to be performed in this case
-                        IGVEventBus.getInstance().post(new AlignmentTrackEvent(AlignmentTrackEvent.Type.RELOAD));
-                    } else {
-                        alignmentTrack.repaint();
-                    }
-                } else {
-                    alignmentTrack.repaint();
-                }
-            });
-
-            duplicatesMenu.add(mi);
-        }
-        add(duplicatesMenu);
     }
 
     private void addShowChimericRegions(final AlignmentTrack alignmentTrack, final TrackClickEvent e, final Alignment clickedAlignment) {
@@ -457,14 +428,15 @@ class AlignmentTrackMenu extends IGVPopupMenu {
                 AlignmentTrack.GroupOption.SUPPLEMENTARY, AlignmentTrack.GroupOption.REFERENCE_CONCORDANCE,
                 AlignmentTrack.GroupOption.MOVIE, AlignmentTrack.GroupOption.ZMW, AlignmentTrack.GroupOption.READ_ORDER,
                 AlignmentTrack.GroupOption.LINKED, AlignmentTrack.GroupOption.PHASE,
-                AlignmentTrack.GroupOption.MAPPING_QUALITY,
-                AlignmentTrack.GroupOption.DUPLICATE
+                AlignmentTrack.GroupOption.MAPPING_QUALITY
         };
 
         for (final AlignmentTrack.GroupOption option : groupOptions) {
             JCheckBoxMenuItem mi = new JCheckBoxMenuItem(option.label);
             mi.setSelected(renderOptions.getGroupByOption() == option);
-            mi.addActionListener(aEvt -> groupAlignments(option, null, null));
+            mi.addActionListener(aEvt -> {
+                groupAlignments(option, null, null);
+            });
             groupMenu.add(mi);
             group.add(mi);
         }

@@ -45,7 +45,12 @@ public abstract class AbstractColorScale implements ColorScale {
     protected Color noDataColor = PreferencesManager.getPreferences().getAsColor(Constants.NO_DATA_COLOR);
 
     public Color getColor(String symbol) {
-        return defaultColor;
+        try{
+            final float floatValue = Float.parseFloat(symbol);
+            return getColor(floatValue);
+        } catch (NumberFormatException |  NullPointerException e){
+            return defaultColor;
+        }
     }
 
     public Color getColor(float value) {

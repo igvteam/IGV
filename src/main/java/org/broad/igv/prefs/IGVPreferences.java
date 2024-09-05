@@ -732,13 +732,13 @@ public class IGVPreferences {
     }
 
 
-    static Set<String> scaledTypes = new HashSet(Arrays.asList(
+    static Set<TrackType> scaledTypes = new HashSet<>(Arrays.asList(
             TrackType.LOH, TrackType.RNAI, TrackType.POOLED_RNAI, TrackType.DNA_METHYLATION,
             TrackType.GENE_EXPRESSION, TrackType.COPY_NUMBER, TrackType.ALLELE_SPECIFIC_COPY_NUMBER, TrackType.CNV));
 
 
     /**
-     * Return the default color scale.  This si the scale for track type "generic",
+     * Return the default color scale.  This is the scale for track type "generic",
      * as well as any track type without a specific scale.
      *
      * @param type

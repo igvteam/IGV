@@ -36,14 +36,14 @@ import java.awt.*;
  */
 public interface ColorScale {
 
-    public Color getColor(String symbol);
+    Color getColor(String symbol);
 
-    public Color getColor(float value);
+    Color getColor(float value);
 
-    public Color getNoDataColor();
+    Color getNoDataColor();
 
-    public String asString();
+    String asString();
 
-    public boolean isDefault();
+    boolean isDefault();
 
 }

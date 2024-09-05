@@ -25,12 +25,38 @@
 
 package org.broad.igv.ui.color;
 
+import org.broad.igv.prefs.Constants;
+import org.broad.igv.prefs.PreferencesManager;
+import org.broad.igv.renderer.ColorScale;
+
 import java.awt.*;
 
 /**
  * @author Jim Robinson
  * @date 11/5/11
  */
-public interface ColorTable {
+public interface ColorTable extends ColorScale {
     Color get(String key);
+
+    default Color getColor(String key){
+        return get(key);
+    }
+
+    default Color getColor(float value) {
+        return get(Double.toString(value));
+    }
+
+
+    default Color getNoDataColor(){
+        return PreferencesManager.getPreferences().getAsColor(Constants.NO_DATA_COLOR);
+    }
+
+
+    default String asString(){
+        return null;
+    }
+
+    default boolean isDefault(){
+        return false;
+    }
 }

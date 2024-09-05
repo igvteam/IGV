@@ -25,6 +25,8 @@
 
 package org.broad.igv.variant;
 
+import htsjdk.variant.vcf.VCFHeader;
+import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import org.broad.igv.logging.*;
 import org.broad.igv.jbrowse.CircularViewUtilities;
 import org.broad.igv.prefs.Constants;
@@ -35,7 +37,10 @@ import org.broad.igv.track.TrackClickEvent;
 import org.broad.igv.track.TrackMenuUtils;
 import org.broad.igv.ui.IGV;
 import org.broad.igv.ui.action.GroupTracksMenuAction;
+import org.broad.igv.ui.panel.FrameManager;
 import org.broad.igv.ui.panel.IGVPopupMenu;
+import org.broad.igv.ui.panel.ReferenceFrame;
+import org.broad.igv.ui.util.MessageUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -98,9 +103,10 @@ public class VariantMenu extends IGVPopupMenu {
         addSeparator();
         JLabel colorSiteByItem = new JLabel("<html>&nbsp;&nbsp;<b>Color By", JLabel.LEFT);
         add(colorSiteByItem);
-        add(getColorBandByAllelFrequency());
-        add(getColorBandByAlleleFraction());
-        //add(getColorByNone());
+        add(getColorByMenuItem(VariantTrack.ColorMode.ALLELE_FREQUENCY, "Allele Frequency"));
+        add(getColorByMenuItem(VariantTrack.ColorMode.ALLELE_FRACTION, "Allele Fraction"));
+        add(getColorByMenuItem(VariantTrack.ColorMode.VARIANT_TYPE, "Variant Type"));
+        add(getColorByInfoTagMenuItem());
 
         //Hides
         if (track.isEnableMethylationRateSupport()) {
@@ -128,6 +134,9 @@ public class VariantMenu extends IGVPopupMenu {
             addSeparator();
             add(getGenotypeGroupItem());
         }
+
+        addSeparator();
+        getJumpToFeatureMenuItems().forEach(this::add);
 
         //Variant Information
         addSeparator();
@@ -168,33 +177,41 @@ public class VariantMenu extends IGVPopupMenu {
     }
 
 
-    private JMenuItem getColorBandByAllelFrequency() {
-        final JMenuItem item = new JCheckBoxMenuItem("Allele Frequency", track.getSiteColorMode() == VariantTrack.ColorMode.ALLELE_FREQUENCY);
+    private JMenuItem getColorByMenuItem(VariantTrack.ColorMode colorMode, String description) {
+        final JMenuItem item = new JCheckBoxMenuItem(description, track.getSiteColorMode() == colorMode);
         item.addActionListener(evt -> {
-            track.setSiteColorMode(VariantTrack.ColorMode.ALLELE_FREQUENCY);
+            track.setSiteColorMode(colorMode);
             IGV.getInstance().getContentPane().repaint();
         });
         return item;
     }
 
 
-    private JMenuItem getColorBandByAlleleFraction() {
-        final JMenuItem item = new JCheckBoxMenuItem("Allele Fraction", track.getSiteColorMode() == VariantTrack.ColorMode.ALLELE_FRACTION);
-        item.addActionListener(evt -> {
-            track.setSiteColorMode(VariantTrack.ColorMode.ALLELE_FRACTION);
-            IGV.getInstance().getContentPane().repaint();
+    private JMenuItem getColorByInfoTagMenuItem() {
+        final JMenuItem item = new JCheckBoxMenuItem("Info Field", track.getSiteColorMode() == VariantTrack.ColorMode.INFO_FIELD);
+
+        item.addActionListener(aEvt -> {
+            track.setSiteColorMode(VariantTrack.ColorMode.INFO_FIELD);
+            final Object header = track.getHeader();
+            final SelectInfoFieldDialog.ColorResult priorValue = track.getColorByInfoField();
+            final String priorTagValue = priorValue != null ? priorValue.value() : null;
+            final SelectInfoFieldDialog.ColorResult tag;
+            if(header instanceof VCFHeader vcfHeader){
+                final List<VCFInfoHeaderLine> infoHeaderLines = new ArrayList<>(vcfHeader.getInfoHeaderLines());
+                tag = MessageUtils.showInputDialog("Enter Info Field", priorTagValue, infoHeaderLines);
+            } else {
+                tag = new SelectInfoFieldDialog.ColorResult(MessageUtils.showInputDialog("Enter Info Field", priorTagValue), null);
+            }
+            if (tag != null && tag.value() != null && !tag.value().trim().isEmpty()) {
+                track.setSiteColorMode(VariantTrack.ColorMode.INFO_FIELD);
+                track.setColorByInfoField(tag);
+                track.repaint();
+            }
         });
         return item;
     }
 
-    private JMenuItem getColorByNone() {
-        final JMenuItem item = new JCheckBoxMenuItem("None", track.getSiteColorMode() == VariantTrack.ColorMode.NONE);
-        item.addActionListener(evt -> {
-            track.setSiteColorMode(VariantTrack.ColorMode.NONE);
-            IGV.getInstance().getContentPane().repaint();
-        });
-        return item;
-    }
+
 
     private JMenuItem getShowGenotypes() {
         final JMenuItem item = new JCheckBoxMenuItem("Show Genotypes", track.isShowGenotypes());
@@ -234,6 +251,24 @@ public class VariantMenu extends IGVPopupMenu {
         return item;
     }
 
+    private List<JComponent> getJumpToFeatureMenuItems() {
+        JLabel heading = new JLabel("Jump to:", JLabel.LEFT);
+        final JMenuItem next = new JMenuItem("Next Variant");
+        final ReferenceFrame frame = FrameManager.getDefaultFrame();
+        next.addActionListener(evt -> {
+            track.moveToNextFeature(true, frame);
+        });
+
+        final JMenuItem previous = new JMenuItem("Previous Variant");
+        previous.addActionListener(evt -> {
+            track.moveToNextFeature(false, frame);
+        });
+
+        final boolean enable = !FrameManager.isGeneListMode();
+        next.setEnabled(enable);
+        previous.setEnabled(enable);
+        return List.of(heading, next, previous);
+    }
 
     public JMenuItem getGenotypeSortItem(final Variant variant) {
 
@@ -263,13 +298,11 @@ public class VariantMenu extends IGVPopupMenu {
         JMenuItem item = new JMenuItem("Sort By Sample Name");
         if (variant != null) {
             item.addActionListener(evt -> {
-                Comparator<String> compare = new Comparator<String>() {
-                    public int compare(String o, String o1) {
-                        if (sampleSortingDirection) {
-                            return o.compareTo(o1);
-                        } else {
-                            return o1.compareTo(o);
-                        }
+                Comparator<String> compare = (o, o1) -> {
+                    if (sampleSortingDirection) {
+                        return o.compareTo(o1);
+                    } else {
+                        return o1.compareTo(o);
                     }
                 };
                 sampleSortingDirection = !sampleSortingDirection;
@@ -314,7 +347,7 @@ public class VariantMenu extends IGVPopupMenu {
     }
 
     public void changeVisibilityWindow() {
-        TrackMenuUtils.changeFeatureVisibilityWindow(Arrays.asList((Track) track));
+        TrackMenuUtils.changeFeatureVisibilityWindow(List.of(track));
     }
 
     public Collection<JMenuItem> getSortMenuItems(Variant variant) {
@@ -329,7 +362,7 @@ public class VariantMenu extends IGVPopupMenu {
 
     public List<JMenuItem> getDisplayModeItems() {
 
-        List<JMenuItem> items = new ArrayList();
+        List<JMenuItem> items = new ArrayList<>();
 
         ButtonGroup group = new ButtonGroup();
 
@@ -378,12 +411,8 @@ public class VariantMenu extends IGVPopupMenu {
      */
     private JMenuItem getLoadBamsItem() {
         final JMenuItem item = new JMenuItem("Load alignments");
-        item.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                track.loadSelectedBams();
-            }
-        });
-        item.setEnabled(selectedSamples != null && selectedSamples.size() > 0);
+        item.addActionListener(evt -> track.loadSelectedBams());
+        item.setEnabled(selectedSamples != null && !selectedSamples.isEmpty());
         return item;
     }
 
@@ -412,17 +441,13 @@ public class VariantMenu extends IGVPopupMenu {
 
 
         private int classifyGenotype(Genotype genotype) {
-
-            if (genotype.isNoCall()) {
-                return genotypeSortingDirection ? 1 : 10;
-            } else if (genotype.isHomVar()) {
-                return 4;
-            } else if (genotype.isHet()) {
-                return 3;
-            } else if (genotype.isHomRef()) {
-                return genotypeSortingDirection ? 2 : 9;
-            }
-            return -1; //Unknown
+            return switch (genotype.getType()) {
+                case NO_CALL -> genotypeSortingDirection ? 1 : 10;
+                case HOM_REF -> genotypeSortingDirection ? 2 : 9;
+                case HOM_VAR -> 4;
+                case HET -> 3;
+                case MIXED, UNAVAILABLE -> -1;
+            };
         }
     }
 

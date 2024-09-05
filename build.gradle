@@ -104,6 +104,7 @@ configurations {
         exclude group: 'xalan', module: 'serializer'
         exclude group: 'xalan', module: 'xalan'
 
+
         // Amazon deps exclusions
         //exclude group: 'software.amazon', module: 'flow'
         //exclude group: 'software.amazon.awssdk', module: 'annotations'
@@ -135,7 +136,10 @@ dependencies {
             [group: 'software.amazon.awssdk', name: 'cognitoidentity', version: amazonVersion],
             [group: 'software.amazon.awssdk', name: 'sts', version: amazonVersion],
             [group: 'software.amazon.awssdk', name: 's3', version: amazonVersion],
-            [group: 'software.amazon.awssdk', name: 'sso', version: amazonVersion]
+            [group: 'software.amazon.awssdk', name: 'sso', version: amazonVersion],
+
+            // Intellij forms support
+            [group: 'com.intellij', name: 'forms_rt', version: '7.0.3']
     )
 
     testImplementation(

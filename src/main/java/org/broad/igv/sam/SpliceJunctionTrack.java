@@ -94,7 +94,7 @@ public class SpliceJunctionTrack extends FeatureTrack implements ScalableTrack {
         this.dataManager = dataManager;
         this.dataManager.subscribe(this);
         this.alignmentTrack = alignmentTrack;
-        SpliceJunctionTrack.strandOption = ignoreStrand;
+        this.strandOption = ignoreStrand;
     }
 
     public SpliceJunctionTrack() {
@@ -123,10 +123,8 @@ public class SpliceJunctionTrack extends FeatureTrack implements ScalableTrack {
         if (!isShowFeatures(context.getReferenceFrame())) {
             Rectangle visibleRect = context.getVisibleRect().intersection(rect);
             Graphics2D g = context.getGraphic2DForColor(Color.gray);
-            String message = context.getReferenceFrame().getChrName().equals(Globals.CHR_ALL) ?
-                    "Select a chromosome and zoom in to see features." :
-                    "Zoom in to see features.";
-            GraphicUtils.drawCenteredText(message, visibleRect, g);
+            GraphicUtils.drawCenteredText("Zoom in to see features.", visibleRect, g);
+            return;
         } else {
             super.render(context, rect);
         }
@@ -207,6 +205,11 @@ public class SpliceJunctionTrack extends FeatureTrack implements ScalableTrack {
 
     public float getRegionScore(String chr, int start, int end, int zoom, RegionScoreType type, String frameName) {
         return 0;
+    }
+
+    @Override
+    protected String getZoomInMessage(String chr) {
+        return "Zoom in to see junctions.";
     }
 
     @Override

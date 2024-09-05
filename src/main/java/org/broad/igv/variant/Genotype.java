@@ -46,7 +46,7 @@ public interface Genotype {
 
     /**
      * @return The GenotypeType.
-     *         Should be GenotypeType.UNAVAILABLE if not known, never null
+     *         Should be {@linkplain GenotypeType#UNAVAILABLE} if not known, never null
      *         See {@link htsjdk.variant.variantcontext.GenotypeType}
      */
     GenotypeType getType();

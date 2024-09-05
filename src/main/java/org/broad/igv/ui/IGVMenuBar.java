@@ -196,14 +196,14 @@ public class IGVMenuBar extends JMenuBar implements IGVEventObserver {
             log.error("Error creating google menu: " + e.getMessage());
         }
 
-
-        AWSMenu = createAWSMenu();
-        AWSMenu.setVisible(false);
-        menus.add(AWSMenu);
-        //detecting the provider is slow, do it in another thread
-        LongRunningTask.submit(this::updateAWSMenu);
-
-
+        try {
+            AWSMenu = createAWSMenu();
+            AWSMenu.setVisible(AmazonUtils.isAwsProviderPresent());
+            menus.add(AWSMenu);
+        } catch (IOException e) {
+            log.error("Error creating the Amazon AWS menu: " + e.getMessage());
+            AWSMenu.setVisible(false);
+        }
 
         menus.add(createHelpMenu());
 
@@ -213,7 +213,7 @@ public class IGVMenuBar extends JMenuBar implements IGVEventObserver {
     }
 
     public void updateAWSMenu() {
-        SwingUtilities.invokeLater(() -> AWSMenu.setVisible(AmazonUtils.isAwsProviderPresent()));
+        AWSMenu.setVisible(AmazonUtils.isAwsProviderPresent());
     }
 
     /**
@@ -965,7 +965,7 @@ public class IGVMenuBar extends JMenuBar implements IGVEventObserver {
         return menu;
     }
 
-    private JMenu createAWSMenu() {
+    private JMenu createAWSMenu() throws IOException {
 
         boolean usingCognito = AmazonUtils.GetCognitoConfig() != null;
 

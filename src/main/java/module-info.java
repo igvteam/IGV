@@ -43,5 +43,6 @@ module org.igv {
     requires software.amazon.awssdk.http;
     requires software.amazon.awssdk.utils;
 
+    //JIDE
     requires jide.oss;
 }

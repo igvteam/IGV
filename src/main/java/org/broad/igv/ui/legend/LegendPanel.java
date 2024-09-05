@@ -34,6 +34,8 @@ package org.broad.igv.ui.legend;
 
 import org.broad.igv.prefs.Constants;
 import org.broad.igv.prefs.PreferencesManager;
+import org.broad.igv.renderer.ColorScale;
+import org.broad.igv.renderer.ContinuousColorScale;
 import org.broad.igv.track.TrackType;
 import org.broad.igv.ui.IGV;
 import org.broad.igv.ui.UIConstants;
@@ -140,4 +142,6 @@ abstract public class LegendPanel extends JPanel {
     abstract protected void reloadPreferences();
 
     abstract protected void persistResetPreferences();
+
+    abstract public ColorScale getColorScale();
 }
