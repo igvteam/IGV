@@ -43,13 +43,13 @@ import java.util.*;
  *
  * @author Jim Robinson
  */
-public class ColorUtilities {
+public final class ColorUtilities {
 
-    private static Logger log = LogManager.getLogger(ColorUtilities.class);
+    private static final Logger log = LogManager.getLogger(ColorUtilities.class);
 
     public static ObjectCache<Object, Color> colorCache = new ObjectCache<>(1000);
-    private static ObjectCache<Color, Color> slightlyDarkerCache = new ObjectCache<>(1000);
-    private static Map<Integer, Color> grayscaleColors = new HashMap();
+    private static final ObjectCache<Color, Color> slightlyDarkerCache = new ObjectCache<>(1000);
+    private static final Map<Integer, Color> grayscaleColors = new HashMap();
 
     // HTML 4.1 color table,  + orange and magenta
     static Map<String, String> colorSymbols = new HashMap();
@@ -164,14 +164,7 @@ public class ColorUtilities {
 
 
     public static String colorToString(Color color) {
-
-        StringBuffer buffer = new StringBuffer();
-        buffer.append(color.getRed());
-        buffer.append(",");
-        buffer.append(color.getGreen());
-        buffer.append(",");
-        buffer.append(color.getBlue());
-        return buffer.toString();
+        return "%d,%d,%d".formatted(color.getRed(), color.getGreen(), color.getBlue());
     }
 
     public static Color stringToColor(String string) {

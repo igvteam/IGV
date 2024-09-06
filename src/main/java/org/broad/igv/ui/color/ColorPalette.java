@@ -30,5 +30,7 @@ import java.awt.*;
 /**
  * @author Jim Robinson
  * @date 11/5/11
+ *
+ * A named set of colors
  */
 public record ColorPalette(String name, Color[] colors) { }

@@ -45,9 +45,9 @@ public class SelectInfoFieldDialog extends IGVDialog {
         setContentPane(contentPane);
         getRootPane().setDefaultButton(buttonOK);
 
-        inputField.setText(defaultValue);
         this.setTitle(title);
 
+        //set cell renderer to change the value that gets displayed, there is probably a more elegant way to do this
         possibleValueList.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(final JList<?> list, final Object value, final int index, final boolean isSelected, final boolean cellHasFocus) {
@@ -71,6 +71,7 @@ public class SelectInfoFieldDialog extends IGVDialog {
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) {
                 onCancel();
             }
@@ -100,6 +101,9 @@ public class SelectInfoFieldDialog extends IGVDialog {
                     colorLegendPanel.add(numericalPanel, BorderLayout.CENTER);
                 }
             }
+
+            //set this after the listeners are set up so that the list is correctly populated
+            inputField.setText(defaultValue);
             colorLegendPanel.revalidate();
             colorLegendPanel.repaint();
         });

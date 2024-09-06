@@ -25,38 +25,31 @@
 
 package org.broad.igv.ui.color;
 
-import org.broad.igv.prefs.Constants;
-import org.broad.igv.prefs.PreferencesManager;
 import org.broad.igv.renderer.ColorScale;
 
 import java.awt.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author Jim Robinson
  * @date 11/5/11
  */
-public interface ColorTable extends ColorScale {
-    Color get(String key);
+public abstract class ColorTable implements ColorScale {
+    final Map<String, Color> colorMap = new LinkedHashMap<>();
 
-    default Color getColor(String key){
-        return get(key);
+    public Color get(String key) {
+        return colorMap.computeIfAbsent(key, this::computeColor);
     }
 
-    default Color getColor(float value) {
+    public Color getColor(String key) { return get(key);}
+    public Color getColor(float value) {
         return get(Double.toString(value));
     }
 
-
-    default Color getNoDataColor(){
-        return PreferencesManager.getPreferences().getAsColor(Constants.NO_DATA_COLOR);
-    }
-
-
-    default String asString(){
+    public String asString(){
         return null;
     }
 
-    default boolean isDefault(){
-        return false;
-    }
+    protected abstract Color computeColor(String key);
 }

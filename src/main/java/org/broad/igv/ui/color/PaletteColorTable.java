@@ -35,49 +35,55 @@ import java.util.*;
  * a palette is used colors are selected sequentially from the palette as needed until it is exhausted.
  * <p/>
  *
+ * If a default color is supplied then it is used for all unknown values
  * @author jrobinso
  * @date Feb 26, 2010
  */
-public class PaletteColorTable implements ColorTable {
+public class PaletteColorTable extends ColorTable {
 
-    LinkedHashMap<String, Color> colorMap;
-    Color[] colors;
-    Color defaultColor;
+    private final LinkedHashMap<String, Color> colorMap = new LinkedHashMap<>();
+
+    //list of predefined colors to use
+    private final Color[] paletteColors;
+    private final Color defaultColor;
 
     public PaletteColorTable() {
-        colorMap = new LinkedHashMap<>();
+        this(null, null);
     }
 
     public PaletteColorTable(Color defaultColor) {
-        this.defaultColor = defaultColor;
-        colorMap = new LinkedHashMap<>();
+        this(null, defaultColor);
     }
 
     public PaletteColorTable(ColorPalette palette) {
-        if (palette != null) {
-            this.colors = palette.colors();
-        }
-        colorMap = new LinkedHashMap<>();
+        this(palette, null);
+    }
+
+    private PaletteColorTable(ColorPalette palette, Color defaultColor){
+        this.paletteColors = palette != null ? palette.colors() : null;
+        this.defaultColor = defaultColor;
     }
 
     public void put(String key, Color c) {
         colorMap.put(key.toLowerCase(), c);
     }
 
+    @Override
     public Color get(String key) {
-        key =key.toLowerCase();
-        Color c = colorMap.get(key);
-        if (c == null) {
-            if(defaultColor != null) {
-                c = defaultColor;
+        return super.get(key.toLowerCase());
+    }
+
+    @Override
+    protected Color computeColor(String key) {
+        final Color c;
+        if(defaultColor != null) {
+            c = defaultColor;
+        } else {
+            final int colorIdx = colorMap.size();
+            if (paletteColors != null && colorIdx < paletteColors.length) {
+                c = paletteColors[colorIdx];
             } else {
-                final int colorIdx = colorMap.size();
-                if (colors != null && colorIdx < colors.length) {
-                    c = colors[colorIdx];
-                } else {
-                    c = ColorUtilities.randomColor(colorIdx);
-                }
-                colorMap.put(key, c);
+                c = ColorUtilities.randomColor(colorIdx);
             }
         }
         return c;
@@ -91,9 +97,8 @@ public class PaletteColorTable implements ColorTable {
         return colorMap.entrySet();
     }
 
-
     public String getMapAsString() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         boolean firstEntry = true;
         for (Map.Entry<String, Color> entry : colorMap.entrySet()) {
             if (!firstEntry) {

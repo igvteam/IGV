@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class ColorScaleFactory {
 
-    static Map<String, ColorScale> colorScaleMap = new HashMap();
+    static Map<String, ColorScale> colorScaleMap = new HashMap<>();
 
 
     public static synchronized ColorScale getScaleFromString(String string) {

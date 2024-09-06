@@ -58,11 +58,11 @@ import static org.broad.igv.prefs.Constants.*;
  */
 public class VariantRenderer { //extends FeatureRenderer {
 
-    private static Logger log = LogManager.getLogger(VariantRenderer.class);
+    private static final Logger log = LogManager.getLogger(VariantRenderer.class);
 
     private static final int BOTTOM_MARGIN = 0;
     private static final int TOP_MARGIN = 3;
-    private static float alphaValue = 0.2f;
+    private static final float ALPHA_VALUE = 0.2f;
 
     static Map<Character, Color> nucleotideColors;
 
@@ -132,29 +132,29 @@ public class VariantRenderer { //extends FeatureRenderer {
 
         if (!prefMgr.getAsColor(AF_VAR_COLOR).equals(colorAlleleBandVar)) {
             colorAlleleBandVar = prefMgr.getAsColor(AF_VAR_COLOR);
-            colorAlleleBandVarAlpha = ColorUtilities.getCompositeColor(colorAlleleBandVar, alphaValue);
+            colorAlleleBandVarAlpha = ColorUtilities.getCompositeColor(colorAlleleBandVar, ALPHA_VALUE);
 
         }
         if (!prefMgr.getAsColor(AF_REF_COLOR).equals(colorAlleleBandRef)) {
             colorAlleleBandRef = prefMgr.getAsColor(AF_REF_COLOR);
-            colorAlleleBandRefAlpha = ColorUtilities.getCompositeColor(colorAlleleBandRef, alphaValue);
+            colorAlleleBandRefAlpha = ColorUtilities.getCompositeColor(colorAlleleBandRef, ALPHA_VALUE);
 
         }
         if (!prefMgr.getAsColor(HOMREF_COLOR).equals(colorHomRef)) {
             colorHomRef = prefMgr.getAsColor(HOMREF_COLOR);
-            colorHomRefAlpha = ColorUtilities.getCompositeColor(colorHomRef, alphaValue);
+            colorHomRefAlpha = ColorUtilities.getCompositeColor(colorHomRef, ALPHA_VALUE);
         }
         if (!prefMgr.getAsColor(HOMVAR_COLOR).equals(colorHomVar)) {
             colorHomVar = prefMgr.getAsColor(HOMVAR_COLOR);
-            colorHomVarAlpha = ColorUtilities.getCompositeColor(colorHomVar, alphaValue);
+            colorHomVarAlpha = ColorUtilities.getCompositeColor(colorHomVar, ALPHA_VALUE);
         }
         if (!prefMgr.getAsColor(HETVAR_COLOR).equals(colorHet)) {
             colorHet = prefMgr.getAsColor(HETVAR_COLOR);
-            colorHetAlpha = ColorUtilities.getCompositeColor(colorHet, alphaValue);
+            colorHetAlpha = ColorUtilities.getCompositeColor(colorHet, ALPHA_VALUE);
         }
         if (!prefMgr.getAsColor(NOCALL_COLOR).equals(colorNoCall)) {
             colorNoCall = prefMgr.getAsColor(NOCALL_COLOR);
-            colorNoCallAlpha = ColorUtilities.getCompositeColor(colorNoCall, alphaValue);
+            colorNoCallAlpha = ColorUtilities.getCompositeColor(colorNoCall, ALPHA_VALUE);
         }
 
     }
@@ -184,7 +184,7 @@ public class VariantRenderer { //extends FeatureRenderer {
         Color colorAlleleRef = variant.isNonRef() ? nonRefColor :   track.getColor();
         //colorAlleleRef = new Color(((int)(Math.random()*255)),((int)(Math.random()*255)),((int)(Math.random()*255)));
 
-        Color colorAlleleRefAlpha = useAlpha ? ColorUtilities.getCompositeColor(colorAlleleRef, alphaValue) : colorAlleleRef;
+        Color colorAlleleRefAlpha = useAlpha ? ColorUtilities.getCompositeColor(colorAlleleRef, ALPHA_VALUE) : colorAlleleRef;
         final List<ColorBand> colorBands;
         final VariantTrack.ColorMode siteColorMode = track.getSiteColorMode();
         if (siteColorMode == VariantTrack.ColorMode.METHYLATION_RATE) {
@@ -240,7 +240,7 @@ public class VariantRenderer { //extends FeatureRenderer {
                 case "MIXED"  -> mixedColor;
                 default -> mixedColor;
             };
-            refColor = useAlpha ? ColorUtilities.getCompositeColor(solidColor, alphaValue) : solidColor;
+            refColor = useAlpha ? ColorUtilities.getCompositeColor(solidColor, ALPHA_VALUE) : solidColor;
             colorBands = List.of(new ColorBand(refColor, 1.0));
         } else if(track.getSiteColorMode() == VariantTrack.ColorMode.INFO_FIELD){
             final SelectInfoFieldDialog.ColorResult infoField = track.getColorByInfoField();
@@ -270,18 +270,6 @@ public class VariantRenderer { //extends FeatureRenderer {
                 g.fill(bar);
             }
         }
-//        final int alleleBarHeight = (int) (percent * totalBarHeight);
-//        final int remainderHeight = totalBarHeight - alleleBarHeight;
-//
-//        if (remainderHeight > 0) {
-//            Graphics2D g = context.getGraphic2DForColor(refColor);
-//            g.fillRect(pixelX, bottomY - alleleBarHeight - remainderHeight, xWidth, remainderHeight);
-//        }
-//
-//        if (alleleBarHeight > 0) {
-//            Graphics2D g = context.getGraphic2DForColor(alleleColor);
-//            g.fillRect(pixelX, bottomY - alleleBarHeight, xWidth, alleleBarHeight);
-//        }
     }
 
     /**

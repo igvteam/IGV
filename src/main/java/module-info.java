@@ -45,4 +45,5 @@ module org.igv {
 
     //JIDE
     requires jide.oss;
+    requires forms.rt;
 }

@@ -724,7 +724,6 @@ public class IGVPreferences {
                 scale = getDefaultColorScale(type);
             }
             if (scale != null) {
-                scale.setDefault(true);
                 colorScaleCache.put(type, scale);
             }
         }

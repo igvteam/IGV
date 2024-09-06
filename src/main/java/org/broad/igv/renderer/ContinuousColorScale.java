@@ -34,7 +34,6 @@ package org.broad.igv.renderer;
 
 import org.broad.igv.prefs.Constants;
 import org.broad.igv.prefs.PreferencesManager;
-import org.broad.igv.ui.UIConstants;
 import org.broad.igv.ui.color.ColorUtilities;
 
 import java.awt.*;
@@ -47,12 +46,12 @@ public class ContinuousColorScale extends AbstractColorScale {
 
 
     /**
-     * String to use to identify this clas when serializing.  We could use
+     * String to use to identify this class when serializing.  We could use
      * the class name, but that would invalidate serialized instances if the
      * name was ever changed.
      */
     public static String serializedClassName = "ContinuousColorScale";
-    private boolean useDoubleGradient;
+    private final boolean useDoubleGradient;
     private double negEnd;
     private double posEnd;
     private double negStart;
@@ -61,7 +60,6 @@ public class ContinuousColorScale extends AbstractColorScale {
     private Color midColor = Color.white;
     private Color maxColor;
     private Color[] colors;
-    private boolean defaultCS = false;
 
 
     /**
@@ -171,14 +169,6 @@ public class ContinuousColorScale extends AbstractColorScale {
         this.midColor = otherScale.midColor;
         this.maxColor = otherScale.maxColor;
         this.useDoubleGradient = true;
-    }
-
-    public void setDefault(boolean defaultCS) {
-        this.defaultCS = defaultCS;
-    }
-
-    public boolean isDefault() {
-        return defaultCS;
     }
 
     public void setNegEnd(double negEnd) {
@@ -413,7 +403,7 @@ public class ContinuousColorScale extends AbstractColorScale {
         private BufferedImage createGradientImage(Color color1, Color color2) {
 
             BufferedImage image =
-                    (BufferedImage) java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+                    GraphicsEnvironment.getLocalGraphicsEnvironment()
                             .getDefaultScreenDevice().getDefaultConfiguration()
                             .createCompatibleImage(256, 1);
             Graphics2D graphics = image.createGraphics();
@@ -447,7 +437,7 @@ public class ContinuousColorScale extends AbstractColorScale {
                 double maximum = (value < mid) ? this.min : this.max;
                 int colorIndex = (int) (255 * (value - mid) / (maximum - mid));
 
-                colorIndex = (colorIndex > 255) ? 255 : colorIndex;
+                colorIndex = Math.min(colorIndex, 255);
                 rgb = (value < mid)
                         ? negImage.getRGB(255 - colorIndex, 0) : posImage.getRGB(colorIndex, 0);
 

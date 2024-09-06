@@ -31,12 +31,14 @@ import org.broad.igv.logging.*;
 import org.broad.igv.jbrowse.CircularViewUtilities;
 import org.broad.igv.prefs.Constants;
 import org.broad.igv.prefs.PreferencesManager;
+import org.broad.igv.renderer.MonocolorScale;
 import org.broad.igv.track.AttributeManager;
 import org.broad.igv.track.Track;
 import org.broad.igv.track.TrackClickEvent;
 import org.broad.igv.track.TrackMenuUtils;
 import org.broad.igv.ui.IGV;
 import org.broad.igv.ui.action.GroupTracksMenuAction;
+import org.broad.igv.ui.color.PaletteColorTable;
 import org.broad.igv.ui.panel.FrameManager;
 import org.broad.igv.ui.panel.IGVPopupMenu;
 import org.broad.igv.ui.panel.ReferenceFrame;
@@ -200,9 +202,9 @@ public class VariantMenu extends IGVPopupMenu {
                 final List<VCFInfoHeaderLine> infoHeaderLines = new ArrayList<>(vcfHeader.getInfoHeaderLines());
                 tag = MessageUtils.showInputDialog("Enter Info Field", priorTagValue, infoHeaderLines);
             } else {
-                tag = new SelectInfoFieldDialog.ColorResult(MessageUtils.showInputDialog("Enter Info Field", priorTagValue), null);
+                tag = new SelectInfoFieldDialog.ColorResult(MessageUtils.showInputDialog("Enter Info Field", priorTagValue), new PaletteColorTable());
             }
-            if (tag != null && tag.value() != null && !tag.value().trim().isEmpty()) {
+            if (tag != null && tag.value() != null && !tag.value().isBlank()) {
                 track.setSiteColorMode(VariantTrack.ColorMode.INFO_FIELD);
                 track.setColorByInfoField(tag);
                 track.repaint();

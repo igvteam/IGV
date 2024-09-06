@@ -29,9 +29,13 @@
  */
 package org.broad.igv.renderer;
 
+import org.broad.igv.prefs.Constants;
+import org.broad.igv.prefs.PreferencesManager;
+
 import java.awt.*;
 
 /**
+ *
  * @author jrobinso
  */
 public interface ColorScale {
@@ -40,10 +44,9 @@ public interface ColorScale {
 
     Color getColor(float value);
 
-    Color getNoDataColor();
-
     String asString();
 
-    boolean isDefault();
-
+    default Color getNoDataColor() {
+        return PreferencesManager.getPreferences().getAsColor(Constants.NO_DATA_COLOR);
+    }
 }
