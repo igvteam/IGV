@@ -645,7 +645,7 @@ public class IGVPreferences {
     public void override(String key, String value) {
         userPreferences.put(key, value);
         overrideKeys.add(key);    // <= order here is important, must be after userPreferences statement
-        Map<String, String> updatedPrefs = new HashMap<String, String>();
+        Map<String, String> updatedPrefs = new HashMap<>();
         updatedPrefs.put(key, value);
         checkForAlignmentChanges(updatedPrefs);
         clearCaches();
@@ -707,8 +707,6 @@ public class IGVPreferences {
      * @param type
      * @return
      */
-
-
     public ContinuousColorScale getColorScale(TrackType type) {
         if (type == null) {
             return null;

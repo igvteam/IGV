@@ -18,9 +18,7 @@ public class DiscreteLegendPanel extends LegendPanel {
     }
 
     protected void reloadPreferences() {
-        
     }
-
 
     protected void persistCurrentPreferences() {
     }

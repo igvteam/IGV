@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class ColorSwatch extends JPanel {
 
     private Color selectedColor;
-    private ArrayList<ColorChangeListener> listeners;
+    private final ArrayList<ColorChangeListener> listeners;
 
     public ColorSwatch(Color selectedColor) {
         this.selectedColor = selectedColor;
@@ -24,7 +24,7 @@ public class ColorSwatch extends JPanel {
         this.addMouseListener(new IGVMouseInputAdapter() {
             @Override
             public void igvMouseClicked(MouseEvent mouseEvent) {
-                changeColorAction(mouseEvent);
+                changeColorAction();
             }
         });
     }
@@ -38,7 +38,7 @@ public class ColorSwatch extends JPanel {
         listeners.add(listener);
     }
 
-    private void changeColorAction(MouseEvent mouseEvent) {
+    private void changeColorAction() {
 
         final JColorChooser colorChooser = new JColorChooser(selectedColor);
         JDialog dialog = JColorChooser.createDialog(

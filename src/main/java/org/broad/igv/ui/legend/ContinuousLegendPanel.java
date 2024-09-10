@@ -32,65 +32,59 @@ package org.broad.igv.ui.legend;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import org.broad.igv.logging.*;
-import org.broad.igv.prefs.IGVPreferences;
-import org.broad.igv.prefs.PreferencesManager;
+import org.broad.igv.logging.LogManager;
+import org.broad.igv.logging.Logger;
+import org.broad.igv.renderer.ColorScale;
 import org.broad.igv.renderer.ContinuousColorScale;
-import org.broad.igv.track.TrackType;
 import org.broad.igv.ui.FontManager;
 import org.broad.igv.ui.IGV;
 import org.broad.igv.ui.util.UIUtilities;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.text.DecimalFormat;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * @author eflakes
  */
-public class HeatmapLegendPanel extends LegendPanel {
+public class ContinuousLegendPanel extends LegendPanel {
 
-    static Logger log = LogManager.getLogger(HeatmapLegendPanel.class);
-
-
-    enum Orientation {HORIZONTAL, VERTICAL}
-
-    private Orientation orientation = Orientation.HORIZONTAL;
-    private TrackType type;
+    private static final Logger log = LogManager.getLogger(ContinuousLegendPanel.class);
 
     public ContinuousColorScale getColorScale() {
         return colorScale;
     }
-
+    public Set<Consumer<ContinuousColorScale>> changeListeners = new LinkedHashSet<>();
+    private final String name;
     protected ContinuousColorScale colorScale;
 
 
-    public HeatmapLegendPanel(TrackType type) {
-        this.type = type;
-        this.colorScale = PreferencesManager.getPreferences().getColorScale(type);
+    public ContinuousLegendPanel(String name, ContinuousColorScale scale) {
+        this.name = name;
+        this.colorScale = scale;
     }
 
-    public HeatmapLegendPanel(TrackType type, Orientation orientation) {
-        this(type);
-        this.orientation = orientation;
-    }
 
     protected void persistCurrentPreferences() {
-        PreferencesManager.getPreferences().setColorScale(type, colorScale);
+        //PreferencesManager.getPreferences().setColorScale(type, colorScale);
     }
 
     protected void resetPreferencesToDefault() {
-        // TODO -- temporary hack.  We need some specific knowledge fo the implementation
-        // in order to edit it,  but do it without a cast
-        colorScale = IGVPreferences.getDefaultColorScale(type);
-        persistCurrentPreferences();
-        showResetDisplay();
-    }
+//        // TODO -- temporary hack.  We need some specific knowledge fo the implementation
+//        // in order to edit it,  but do it without a cast
+//        colorScale = IGVPreferences.getDefaultColorScale(type);
+//        persistCurrentPreferences();
+//        showResetDisplay();
+   }
 
     protected void reloadPreferences() {
-        PreferencesManager.getPreferences().setColorScale(type, colorScale);
-        //ColorScaleFactory.clearCache();
-        repaint();
+//        PreferencesManager.getPreferences().setColorScale(type, colorScale);
+//        //ColorScaleFactory.clearCache();
+//        repaint();
     }
 
     /**
@@ -104,7 +98,7 @@ public class HeatmapLegendPanel extends LegendPanel {
 
             ContinuousLegendEditor dialog = new ContinuousLegendEditor(IGV.getInstance().getMainFrame(), true, colorScale);
 
-            dialog.setTitle("HeatMap Preferences");
+            dialog.setTitle(name + " preferences");
             dialog.setVisible(true);
 
 
@@ -114,26 +108,24 @@ public class HeatmapLegendPanel extends LegendPanel {
             }
 
             colorScale = dialog.getColorScheme();
-            PreferencesManager.getPreferences().setColorScale(type, colorScale);
+            changeListeners.forEach(c -> c.accept(colorScale));
+            //PreferencesManager.getPreferences().setColorScale(type, colorScale);
             IGV.getInstance().repaint();
             try {
-
                 reloadPreferences();
-
             } finally {
-
-                UIUtilities.invokeOnEventThread(() -> SwingUtilities.getWindowAncestor(HeatmapLegendPanel.this).toFront());
+                UIUtilities.invokeOnEventThread(() -> SwingUtilities.getWindowAncestor(ContinuousLegendPanel.this).toFront());
                 IGV.getInstance().resetStatusMessage();
             }
         });
     }
 
+    public void addChangeListener(Consumer<ContinuousColorScale> listener) {
+        changeListeners.add(listener);
+    }
+
     protected void paintLegend(Graphics2D g) {
-        if (orientation == Orientation.HORIZONTAL) {
-            paintHorizontal(g);
-        } else {
-            paintVertical(g);
-        }
+        paintHorizontal(g);
     }
 
     protected void paintHorizontal(Graphics2D g2D) {
@@ -173,49 +165,6 @@ public class HeatmapLegendPanel extends LegendPanel {
             g2D.drawString(formatter.format(labelVal), x0, (int) getHeight() - 5);
         }
 
-    }
-
-    void paintVertical(Graphics2D g2D) {
-
-        DecimalFormat formatter = new DecimalFormat("0.0");
-
-        g2D.setFont(FontManager.getFont(10));
-
-        int npts = 5;
-        double max = colorScale.getMaximum();
-        double min = colorScale.getMinimum();
-
-        int h = getWidth() - 20;
-        double dy = ((double) h) / npts;
-        double dyj = dy / 10;
-        double delta = (max - min) / npts;
-        double deltaj = delta / 10;
-
-        int x0 = 10;
-        int dx = 10;
-        int y0;
-        int y1 = 0;
-
-
-        for (int i = 0; i < npts + 1; i++) {
-            for (int j = i * 10; j < i * 10 + 10; j++) {
-                double val = min + j * deltaj;
-
-                Color c = colorScale.getColor((float) val);
-
-                g2D.setColor(c);
-
-                y0 = (int) (j * dyj);
-                y1 = (int) ((j + 1) * dyj);
-
-                g2D.fillRect(x0, y0, dx, y1 - y0);
-            }
-
-            double labelVal = min + i * delta;
-
-            g2D.setColor(Color.BLACK);
-            g2D.drawString(formatter.format(labelVal), x0 + 15, y1 - 5);
-        }
     }
 
 }

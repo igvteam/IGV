@@ -60,7 +60,7 @@ public class ContinuousColorScale extends AbstractColorScale {
     private Color midColor = Color.white;
     private Color maxColor;
     private Color[] colors;
-
+    private double delta;
 
     /**
      * Constructs ...
@@ -212,7 +212,7 @@ public class ContinuousColorScale extends AbstractColorScale {
      * @return
      */
     public String asString() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(serializedClassName + ";");
         if (useDoubleGradient) {
             buf.append(String.valueOf(negStart) + ";");
@@ -231,7 +231,7 @@ public class ContinuousColorScale extends AbstractColorScale {
         return buf.toString();
     }
 
-    private double delta;
+
 
     private void initColors() {
         colors = new Color[251];
@@ -368,12 +368,12 @@ public class ContinuousColorScale extends AbstractColorScale {
 
     static class ColorGradient {
 
-        private  Color minColor;
-        private  Color maxColor;
+        private final Color minColor;
+        private final Color maxColor;
 
-        boolean useDoubleGradient = true;
-        double min, max, mid;
-        BufferedImage posImage, negImage;
+        private final double min;
+        private final double max;
+        private final BufferedImage posImage;
 
 
         /**
@@ -385,12 +385,11 @@ public class ContinuousColorScale extends AbstractColorScale {
          * @param posColor
          */
         public ColorGradient(double min, double max, Color negColor, Color posColor) {
-            this.useDoubleGradient = false;
             this.min = min;
             this.max = max;
             this.minColor = negColor;
             this.maxColor = posColor;
-            posImage = createGradientImage(negColor, posColor);
+            this.posImage = createGradientImage(negColor, posColor);
         }
 
         /**
@@ -400,7 +399,7 @@ public class ContinuousColorScale extends AbstractColorScale {
          * @param color2 <CODE>Color</CODE> to display at right side of gradient
          * @return returns a gradient image
          */
-        private BufferedImage createGradientImage(Color color1, Color color2) {
+        private static BufferedImage createGradientImage(Color color1, Color color2) {
 
             BufferedImage image =
                     GraphicsEnvironment.getLocalGraphicsEnvironment()
@@ -416,46 +415,25 @@ public class ContinuousColorScale extends AbstractColorScale {
             return image;
         }
 
-        /**
-         * Method description
-         *
-         * @param value
-         * @return
-         */
         public Color getColor(double value) {
-
-            int rgb;
-
             if(value <= this.min) {
                 return minColor;
             } else if(value >= this.max) {
                 return maxColor;
             }
 
-            if (useDoubleGradient) {
+            double span = this.max - this.min;
+            int colorIndex = 0;
 
-                double maximum = (value < mid) ? this.min : this.max;
-                int colorIndex = (int) (255 * (value - mid) / (maximum - mid));
-
-                colorIndex = Math.min(colorIndex, 255);
-                rgb = (value < mid)
-                        ? negImage.getRGB(255 - colorIndex, 0) : posImage.getRGB(colorIndex, 0);
-
+            if (value <= min) {
+                colorIndex = 0;
+            } else if (value >= max) {
+                colorIndex = 255;
             } else {
-
-                double span = this.max - this.min;
-                int colorIndex = 0;
-
-                if (value <= min) {
-                    colorIndex = 0;
-                } else if (value >= max) {
-                    colorIndex = 255;
-                } else {
-                    colorIndex = (int) (((value - this.min) / span) * 255);
-                }
-
-                rgb = posImage.getRGB(colorIndex, 0);
+                colorIndex = (int) (((value - this.min) / span) * 255);
             }
+
+            int rgb = posImage.getRGB(colorIndex, 0);
 
             return new Color(rgb);
         }

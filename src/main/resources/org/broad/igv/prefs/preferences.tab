@@ -5,7 +5,7 @@ IGV.track.show.attribute.views	Show attribute panel	boolean	FALSE
 SHOW_DEFAULT_TRACK_ATTRIBUTES	Show default track attributes	boolean	FALSE
 SHOW_REGION_BARS	Show region-of-interest boundaries	boolean	FALSE
 ENABLE_GOOGLE_MENU	Enable Google access	boolean	FALSE	Enable loading from Google apis.
-FLANKING_REGION	"Search for feature" padding region in bp, < 0 is interpreted as a percentage.	integer	2000	
+FLANKING_REGION	"Search for feature" padding region in bp, < 0 is interpreted as a percentage.	integer	2000
 DEFAULT_VISIBILITY_WINDOW	Default visibility window (kilobases), < 0 disables visibility window.	float	-1
 
 ## Session Autosave
@@ -53,6 +53,11 @@ NOCALL.COLOR	No call	color	255,255,255
 AF_REF.COLOR	Allele frequency - reference	color	0,0,220
 AF_VAR.COLOR	Allele frequency - variant	color	255,0,0
 VARIANT_COLOR_BY_ALLELE_FREQ	Color by allele frequency (uncheck to color by allele fraction)	boolean	TRUE
+##Attribute Colors
+VARIANT_INFO_DP	Site Depth (DP)	colorScale	ContinuousColorScale;0;100;216,216,216;0,200,0
+VARIANT_INFO_SAS_AF	SAS_AF	colorScale	ContinuousColorScale;0;1;20,20,20;0,200,200
+
+
 
 #Mutations
 info	Settings on this tab apply to TCGA  "maf" and "mut" files.

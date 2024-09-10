@@ -58,7 +58,7 @@ import java.util.List;
 public class VariantMenu extends IGVPopupMenu {
 
     private static Logger log = LogManager.getLogger(VariantMenu.class);
-    private VariantTrack track;
+    private final VariantTrack track;
     private Collection<String> selectedSamples;
     static boolean depthSortingDirection;
     static boolean genotypeSortingDirection;
@@ -190,8 +190,12 @@ public class VariantMenu extends IGVPopupMenu {
 
 
     private JMenuItem getColorByInfoTagMenuItem() {
-        final JMenuItem item = new JCheckBoxMenuItem("Info Field", track.getSiteColorMode() == VariantTrack.ColorMode.INFO_FIELD);
-
+        String title = "Info Field";
+        final JMenuItem item = new JCheckBoxMenuItem(title, track.getSiteColorMode() == VariantTrack.ColorMode.INFO_FIELD);
+        SelectInfoFieldDialog.ColorResult prior = track.getColorByInfoField();
+        if(item.isSelected() && prior != null){
+            item.setText(title + " (" + prior.value() + ")");
+        }
         item.addActionListener(aEvt -> {
             track.setSiteColorMode(VariantTrack.ColorMode.INFO_FIELD);
             final Object header = track.getHeader();
@@ -379,20 +383,16 @@ public class VariantMenu extends IGVPopupMenu {
 
         JRadioButtonMenuItem m2 = new JRadioButtonMenuItem("Squished");
         m2.setSelected(displayMode == Track.DisplayMode.SQUISHED);
-        m2.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                track.setDisplayMode(Track.DisplayMode.SQUISHED);
-                track.repaint();
-            }
+        m2.addActionListener(evt -> {
+            track.setDisplayMode(Track.DisplayMode.SQUISHED);
+            track.repaint();
         });
 
         JRadioButtonMenuItem m3 = new JRadioButtonMenuItem("Expanded");
         m3.setSelected(displayMode == Track.DisplayMode.EXPANDED);
-        m3.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                track.setDisplayMode(Track.DisplayMode.EXPANDED);
-                track.repaint();
-            }
+        m3.addActionListener(evt -> {
+            track.setDisplayMode(Track.DisplayMode.EXPANDED);
+            track.repaint();
         });
 
 
