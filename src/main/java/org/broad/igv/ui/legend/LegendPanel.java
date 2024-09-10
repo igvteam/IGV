@@ -32,19 +32,14 @@ package org.broad.igv.ui.legend;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import org.broad.igv.prefs.Constants;
 import org.broad.igv.prefs.PreferencesManager;
 import org.broad.igv.renderer.ColorScale;
-import org.broad.igv.renderer.ContinuousColorScale;
-import org.broad.igv.track.TrackType;
 import org.broad.igv.ui.IGV;
 import org.broad.igv.ui.UIConstants;
-import org.broad.igv.ui.WaitCursorManager;
 import org.broad.igv.ui.util.IGVMouseInputAdapter;
 import org.broad.igv.ui.util.UIUtilities;
 
 import javax.swing.*;
-import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -54,24 +49,15 @@ import java.awt.event.MouseEvent;
  */
 abstract public class LegendPanel extends JPanel {
 
-    protected TrackType type;
-    private MouseInputListener mouseListener;
-    private WaitCursorManager.CursorToken token;
-
     /**
      * Constructs ...
      */
     public LegendPanel() {
 
-        mouseListener = new IGVMouseInputAdapter() {
-
+        MouseInputListener mouseListener = new IGVMouseInputAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
                 LegendPanel.this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
             }
 
             @Override
@@ -84,8 +70,6 @@ abstract public class LegendPanel extends JPanel {
         UIUtilities.invokeOnEventThread(() -> LegendPanel.this.setToolTipText(UIConstants.CLICK_ITEM_TO_EDIT_TOOLTIP));
     }
 
-    abstract protected void resetPreferencesToDefault();
-
     protected void showResetDisplay() {
         try {
             reloadPreferences();
@@ -95,15 +79,6 @@ abstract public class LegendPanel extends JPanel {
             IGV.getInstance().resetStatusMessage();
         }
 
-    }
-
-    /**
-     * Method description
-     *
-     * @param type
-     */
-    public void setTrackType(TrackType type) {
-        this.type = type;
     }
 
     /**
@@ -128,20 +103,20 @@ abstract public class LegendPanel extends JPanel {
      */
     abstract public void edit();
 
-    /*
-     * protected void setColorScheme(double minimum, double median, double maximum,
-     * Color minColor, Color medianColor, Color maxColor) {
-     * colorScheme =
-     * new ContinuousColorScale(minimum, maximum,
-     * minColor, medianColor, maxColor, median, median);
-     * }
+    /**
+     * reload preferences from the saved IGV preferences
      */
-
-    // abstract protected LinkedHashMap<String, PreferenceDescriptor> addPreferences();
-
     abstract protected void reloadPreferences();
 
-    abstract protected void persistResetPreferences();
+    /**
+     * reset the IGV preferences to their default
+     */
+    abstract protected void resetPreferencesToDefault();
+
+    /**
+     * write back the current preferences in this dialog to the IGV preferences
+     */
+    abstract protected void persistCurrentPreferences();
 
     abstract public ColorScale getColorScale();
 }

@@ -311,14 +311,14 @@ public final class ColorUtilities {
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String nextLine;
 
-        palettes = new LinkedHashMap<String, ColorPalette>();
-        palleteNames = new ArrayList();
+        palettes = new LinkedHashMap<>();
+        palleteNames = new ArrayList<>();
 
         String currentPalletName = null;
-        java.util.List<Color> currentColorList = new ArrayList();
+        java.util.List<Color> currentColorList = new ArrayList<>();
         while ((nextLine = br.readLine()) != null) {
             nextLine = nextLine.trim();
-            if (nextLine.length() == 0) continue;
+            if (nextLine.isEmpty()) continue;
             if (nextLine.startsWith("#")) {
                 if (currentPalletName != null) {
                     ColorPalette palette = new ColorPalette(currentPalletName, currentColorList.toArray(new Color[currentColorList.size()]));
@@ -349,7 +349,7 @@ public final class ColorUtilities {
     }
 
     static int nextPaletteIdx = 0;
-    static ArrayList<String> palleteNames = new ArrayList();
+    static ArrayList<String> palleteNames = new ArrayList<>();
 
     public static ColorPalette getNextPalette() {
         try {

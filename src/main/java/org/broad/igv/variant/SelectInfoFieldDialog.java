@@ -7,8 +7,13 @@ import com.jidesoft.swing.ListSearchable;
 import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
 import org.broad.igv.renderer.ColorScale;
+import org.broad.igv.track.AttributeManager;
 import org.broad.igv.track.TrackType;
 import org.broad.igv.ui.IGVDialog;
+import org.broad.igv.ui.color.ColorTable;
+import org.broad.igv.ui.color.ColorUtilities;
+import org.broad.igv.ui.color.PaletteColorTable;
+import org.broad.igv.ui.legend.DiscreteLegendPanel;
 import org.broad.igv.ui.legend.HeatmapLegendPanel;
 import org.broad.igv.ui.legend.LegendPanel;
 import org.broad.igv.ui.legend.MutationLegendPanel;
@@ -96,8 +101,24 @@ public class SelectInfoFieldDialog extends IGVDialog {
                 if (selectedValue.getType() == VCFHeaderLineType.Integer || selectedValue.getType() == VCFHeaderLineType.Float) {
                     numericalPanel = new HeatmapLegendPanel(TrackType.GENE_EXPRESSION);
                     colorLegendPanel.add(numericalPanel, BorderLayout.CENTER);
+                } else if (selectedValue.getType() == VCFHeaderLineType.Flag){
+                    PaletteColorTable colorTable = AttributeColorManager.getBooleanColorTable(AttributeColorManager.Type.INFO, selectedValue.getID());
+                    numericalPanel = new DiscreteLegendPanel(colorTable);
+                    colorLegendPanel.add(numericalPanel, BorderLayout.CENTER);
                 } else {
-                    numericalPanel = new MutationLegendPanel();
+//                    VariantAttributeStats.Stats stats = VariantAttributeStats.getInstance().getStats(VariantAttributeStats.Type.INFO, selectedValue.getID());
+//                    PaletteColorTable colorTable = switch (stats){
+//                        case VariantAttributeStats.Stats.Discrete discrete -> {
+//                            PaletteColorTable colorTable = new PaletteColorTable(ColorUtilities.getPalette("Pastel 1"));
+//                            for(String value : discrete.getValues()){
+//                                colorTable.get(value); //getting values triggers adding them to the map
+//                            }
+//                            yield colorTable;
+//                        }
+//                        default -> null;
+//                    };
+                    PaletteColorTable colorTable = AttributeColorManager.getColorTable(AttributeColorManager.Type.INFO, selectedValue.getID());
+                    numericalPanel = new DiscreteLegendPanel(colorTable);
                     colorLegendPanel.add(numericalPanel, BorderLayout.CENTER);
                 }
             }

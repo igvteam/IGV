@@ -418,7 +418,7 @@ public class PreferencesEditor {
     static private void extractMutationPreferences(Map<String, String> prefs) {
 
         PaletteColorTable ct = PreferencesManager.getPreferences().getMutationColorScheme();
-        Set<String> keys = new HashSet(ct.getKeys());
+        Set<String> keys = new HashSet<>(ct.getKeys());
         keys.addAll(Arrays.asList("Indel", "Missense", "Nonsense", "Splice_site", "Synonymous", "Targeted_Region",
                 "Unknown", "Truncating", "Non-coding_Transcript", "Other_AA_changing", "Other_likely_neutral"));
 

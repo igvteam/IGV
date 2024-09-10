@@ -294,8 +294,8 @@ public class VariantRenderer { //extends FeatureRenderer {
                         //handle flag specially
                         if (infoHeaderLine.getType() == VCFHeaderLineType.Flag) {
                             return vc.hasAttribute(fieldName)
-                                    ? List.of(new ColorBand(trueColor, 1.0))
-                                    : List.of(new ColorBand(falseColor, 1.0));
+                                    ? List.of(new ColorBand(tagScale.getColor("true"), 1.0))
+                                    : List.of(new ColorBand(tagScale.getColor("false"), 1.0));
                         } else if (vc.hasAttribute(fieldName)) {
                             List<String> values = vc.getAttributeAsStringList(fieldName, "");
                             if (values.isEmpty()) {

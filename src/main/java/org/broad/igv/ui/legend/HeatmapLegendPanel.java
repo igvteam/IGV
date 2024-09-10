@@ -33,6 +33,7 @@ package org.broad.igv.ui.legend;
 //~--- non-JDK imports --------------------------------------------------------
 
 import org.broad.igv.logging.*;
+import org.broad.igv.prefs.IGVPreferences;
 import org.broad.igv.prefs.PreferencesManager;
 import org.broad.igv.renderer.ContinuousColorScale;
 import org.broad.igv.track.TrackType;
@@ -74,15 +75,15 @@ public class HeatmapLegendPanel extends LegendPanel {
         this.orientation = orientation;
     }
 
-    protected void persistResetPreferences() {
+    protected void persistCurrentPreferences() {
         PreferencesManager.getPreferences().setColorScale(type, colorScale);
     }
 
     protected void resetPreferencesToDefault() {
         // TODO -- temporary hack.  We need some specific knowledge fo the implementation
         // in order to edit it,  but do it without a cast
-        colorScale = PreferencesManager.getPreferences().getDefaultColorScale(type);
-        persistResetPreferences();
+        colorScale = IGVPreferences.getDefaultColorScale(type);
+        persistCurrentPreferences();
         showResetDisplay();
     }
 

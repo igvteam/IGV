@@ -41,11 +41,10 @@ import java.util.*;
  */
 public class PaletteColorTable extends ColorTable {
 
-    private final LinkedHashMap<String, Color> colorMap = new LinkedHashMap<>();
-
     //list of predefined colors to use
     private final Color[] paletteColors;
     private final Color defaultColor;
+    private final Color nullColor = Color.LIGHT_GRAY;
 
     public PaletteColorTable() {
         this(null, null);
@@ -64,12 +63,16 @@ public class PaletteColorTable extends ColorTable {
         this.defaultColor = defaultColor;
     }
 
+
     public void put(String key, Color c) {
         colorMap.put(key.toLowerCase(), c);
     }
 
     @Override
     public Color get(String key) {
+        if(key == null) {
+             return nullColor;
+        }
         return super.get(key.toLowerCase());
     }
 
@@ -150,7 +153,7 @@ public class PaletteColorTable extends ColorTable {
         }
     }
 
-    public LinkedHashMap<String,Color> getColorMap() {
+    public Map<String,Color> getColorMap() {
         return colorMap;
     }
 }
