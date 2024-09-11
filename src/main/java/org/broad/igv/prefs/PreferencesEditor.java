@@ -20,7 +20,6 @@ import org.broad.igv.util.Utilities;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.File;
@@ -376,7 +375,7 @@ public class PreferencesEditor {
         saveButton.setMaximumSize(new Dimension(100, 30));
         saveButton.setDefaultCapable(true);
         saveButton.addActionListener((event) -> {
-            saveAction(event, updatedPreferencesMap);
+            saveAction(updatedPreferencesMap);
             SwingUtilities.invokeLater(() -> parent.setVisible(false));
         });
 
@@ -392,7 +391,7 @@ public class PreferencesEditor {
         panel.add(saveCancelPanel, BorderLayout.SOUTH);
     }
 
-    private static void saveAction(ActionEvent event, Map<String, Map<String, String>> updatedPreferencesMap) {
+    private static void saveAction(Map<String, Map<String, String>> updatedPreferencesMap) {
 
         for (Map<String, String> prefs : updatedPreferencesMap.values()) {
             extractMutationPreferences(prefs);

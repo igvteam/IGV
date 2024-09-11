@@ -32,16 +32,13 @@ package org.broad.igv.ui.legend;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import org.broad.igv.logging.LogManager;
-import org.broad.igv.logging.Logger;
-import org.broad.igv.renderer.ColorScale;
 import org.broad.igv.renderer.ContinuousColorScale;
 import org.broad.igv.ui.FontManager;
 import org.broad.igv.ui.IGV;
+import org.broad.igv.ui.color.ColorUtilities;
 import org.broad.igv.ui.util.UIUtilities;
 
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.LinkedHashSet;
@@ -53,21 +50,19 @@ import java.util.function.Consumer;
  */
 public class ContinuousLegendPanel extends LegendPanel {
 
-    private static final Logger log = LogManager.getLogger(ContinuousLegendPanel.class);
-
-    public ContinuousColorScale getColorScale() {
-        return colorScale;
-    }
-    public Set<Consumer<ContinuousColorScale>> changeListeners = new LinkedHashSet<>();
     private final String name;
-    protected ContinuousColorScale colorScale;
+    private final Set<Consumer<ContinuousColorScale>> changeListeners = new LinkedHashSet<>();
 
+    protected ContinuousColorScale colorScale;
 
     public ContinuousLegendPanel(String name, ContinuousColorScale scale) {
         this.name = name;
         this.colorScale = scale;
     }
 
+    public ContinuousColorScale getColorScale() {
+        return colorScale;
+    }
 
     protected void persistCurrentPreferences() {
         //PreferencesManager.getPreferences().setColorScale(type, colorScale);
@@ -98,7 +93,7 @@ public class ContinuousLegendPanel extends LegendPanel {
 
             ContinuousLegendEditor dialog = new ContinuousLegendEditor(IGV.getInstance().getMainFrame(), true, colorScale);
 
-            dialog.setTitle(name + " preferences");
+            dialog.setTitle(name + " Preferences");
             dialog.setVisible(true);
 
 
@@ -125,24 +120,23 @@ public class ContinuousLegendPanel extends LegendPanel {
     }
 
     protected void paintLegend(Graphics2D g) {
-        paintHorizontal(g);
-    }
 
-    protected void paintHorizontal(Graphics2D g2D) {
+        final DecimalFormat formatter = new DecimalFormat("0.0");
 
-        DecimalFormat formatter = new DecimalFormat("0.0");
+        final Font font = FontManager.getFont(10);
+        g.setFont(font);
 
-        g2D.setFont(FontManager.getFont(10));
+        final int textHeight = g.getFontMetrics().getHeight();
+        final int compactHeight = textHeight * 2;
+        final int npts = 5;
+        final double max = colorScale.getMaximum();
+        final double min = colorScale.getMinimum();
 
-        int npts = 5;
-        double max = colorScale.getMaximum();
-        double min = colorScale.getMinimum();
-
-        int w = getWidth() - 20;
-        double dx = ((double) w) / npts;
-        double dxj = dx / 10;
-        double delta = (max - min) / npts;
-        double deltaj = delta / 10;
+        final int w = getWidth() - 20;
+        final double dx = ((double) w) / npts;
+        final double dxj = dx / 10;
+        final double delta = (max - min) / npts;
+        final double deltaj = delta / 10;
 
         for (int i = 0; i < npts + 1; i++) {
             for (int j = i * 10; j < i * 10 + 10; j++) {
@@ -150,21 +144,30 @@ public class ContinuousLegendPanel extends LegendPanel {
 
                 Color c = colorScale.getColor((float) val);
 
-                g2D.setColor(c);
+                g.setColor(c);
 
                 int x0 = (int) (j * dxj);
                 int x1 = (int) ((j + 1) * dxj);
 
-                g2D.fillRect(x0, 0, (x1 - x0), (int) (getHeight() / 2));
+                if(getHeight() < compactHeight) { //space is limited so use all of it
+                    g.fillRect(x0, 0, (x1 - x0), getHeight() );
+                } else {
+                    g.fillRect(x0, 0, (x1 - x0), getHeight() / 2);
+                }
             }
 
             double labelVal = min + i * delta;
             int x0 = (int) (i * dx);
-
-            g2D.setColor(Color.BLACK);
-            g2D.drawString(formatter.format(labelVal), x0, (int) getHeight() - 5);
+            if(getHeight() < compactHeight){ // if space is limited place text over the bar
+                Color background = colorScale.getColor((float)labelVal);
+                g.setColor(ColorUtilities.getVisibleOverlay(background));
+                g.drawString(formatter.format(labelVal), x0, (getHeight() / 2) + (textHeight / 2));
+            } else {
+                g.setColor(Color.BLACK);
+                g.drawString(formatter.format(labelVal), x0, getHeight() - 5);
+            }
         }
-
     }
+
 
 }

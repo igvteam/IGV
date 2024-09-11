@@ -478,4 +478,27 @@ public final class ColorUtilities {
     }
 
 
+    /**
+     * Get a color which will be clearly visible over the given background color
+     * @param background color of the background
+     * @return either White or Black depending on how bright the background color is
+     */
+    public static Color getVisibleOverlay(Color background){
+        double luma = getPerceivedBrightness(background);
+        if(luma < 120){ // This threshold is just me eyeballing what looks ok
+           return Color.WHITE;
+        } else {
+            return Color.BLACK;
+        }
+    }
+
+    /**
+     * estimate the perceptual brightness (luma) of a color
+     * see: https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
+     *
+     * @return an estimate of the perceived brightness of the input color
+     */
+    public static double getPerceivedBrightness(Color color) {
+        return 0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue();
+    }
 }
