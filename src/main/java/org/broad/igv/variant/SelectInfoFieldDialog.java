@@ -132,14 +132,8 @@ public class SelectInfoFieldDialog extends IGVDialog {
         });
         LegendPanel panel = switch(scale) {
             case ContinuousColorScale continuous -> new ContinuousLegendPanel(id, continuous);
-            case PaletteColorTable discrete -> {
-            //    PaletteColorTable colorTable = AttributeColorManager.getBooleanColorTable(AttributeColorManager.Type.INFO, id);
-                yield new DiscreteLegendPanel(discrete);
-            }
-            default -> {
-                PaletteColorTable colorTable = AttributeColorManager.getColorTable(AttributeColorManager.Type.INFO, id);
-                yield new DiscreteLegendPanel(colorTable);
-            }
+            case PaletteColorTable discrete ->  new DiscreteLegendPanel(discrete);
+            default -> throw new IllegalArgumentException("Unexpected ColorScale type " + scale.asString());
         };
 
         return panel;

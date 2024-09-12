@@ -30,13 +30,14 @@ import org.broad.igv.renderer.ColorScale;
 import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.SequencedMap;
 
 /**
  * @author Jim Robinson
  * @date 11/5/11
  */
 public abstract class ColorTable implements ColorScale {
-    final Map<String, Color> colorMap = new LinkedHashMap<>();
+    final SequencedMap<String, Color> colorMap = new LinkedHashMap<>();
 
     public Color get(String key) {
         return colorMap.computeIfAbsent(key, this::computeColor);

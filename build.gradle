@@ -444,7 +444,8 @@ tasks.register('signWinExeDist', Exec) {
     }
 }
 
-task signWinExeWithJavaDist(type: Exec, dependsOn: createWinWithJavaExeDist) {
+tasks.register('signWinExeWithJavaDist', Exec) {
+    dependsOn createWinWithJavaExeDist
     standardInput = new ByteArrayInputStream(keyPassword.getBytes());
     commandLine(signcodeCommand, "-spc", spcFile, "-v", pvkFile, "-a", "sha512",
             "-\$", "commercial", "-n", "IGV ${version}", "-i", "http://www.igv.org/",
@@ -456,7 +457,8 @@ task signWinExeWithJavaDist(type: Exec, dependsOn: createWinWithJavaExeDist) {
     }
 }
 
-task fullJar(type: Jar, dependsOn: jar) {
+tasks.register('fullJar', Jar) {
+    dependsOn jar
     // Based on https://discuss.gradle.org/t/removing-dependencies-from-a-jar-file-during-jar-task/5521/3
     from {
         ((configurations.compile - configurations.default) + "${buildDir}/libs/igv.jar").collect {
