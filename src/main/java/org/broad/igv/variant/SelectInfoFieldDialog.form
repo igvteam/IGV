@@ -166,7 +166,16 @@
                   <toolTipText value="heatmap"/>
                 </properties>
                 <border type="none"/>
-                <children/>
+                <children>
+                  <component id="44d3a" class="javax.swing.JButton" binding="saveScaleButton">
+                    <constraints border-constraint="East"/>
+                    <properties>
+                      <enabled value="false"/>
+                      <text value="Persist"/>
+                      <toolTipText value="Save the mapping between field and color for future sessions."/>
+                    </properties>
+                  </component>
+                </children>
               </grid>
             </children>
           </splitpane>

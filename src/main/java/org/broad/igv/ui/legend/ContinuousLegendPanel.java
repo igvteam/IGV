@@ -79,7 +79,7 @@ public class ContinuousLegendPanel extends LegendPanel {
     protected void reloadPreferences() {
 //        PreferencesManager.getPreferences().setColorScale(type, colorScale);
 //        //ColorScaleFactory.clearCache();
-//        repaint();
+        repaint();
     }
 
     /**

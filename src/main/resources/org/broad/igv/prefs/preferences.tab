@@ -53,6 +53,9 @@ NOCALL.COLOR	No call	color	255,255,255
 AF_REF.COLOR	Allele frequency - reference	color	0,0,220
 AF_VAR.COLOR	Allele frequency - variant	color	255,0,0
 VARIANT_COLOR_BY_ALLELE_FREQ	Color by allele frequency (uncheck to color by allele fraction)	boolean	TRUE
+##Default Attribute Color Scales
+DEFAULT_CONTINUOUS_SCALE	colorScale	ContinuousColorScale;0;100;216,216,216;0,200,0
+// DEFAULT_DISCRETE_SCALE	colorScale	ContinuousColorScale;0;100;216,216,216;0,200,0
 ##Attribute Colors
 VARIANT_INFO_DP	Site Depth (DP)	colorScale	ContinuousColorScale;0;100;216,216,216;0,200,0
 VARIANT_INFO_SAS_AF	SAS_AF	colorScale	ContinuousColorScale;0;1;20,20,20;0,200,200

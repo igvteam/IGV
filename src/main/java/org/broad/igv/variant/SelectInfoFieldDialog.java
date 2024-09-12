@@ -6,23 +6,18 @@ import com.jidesoft.swing.AutoCompletion;
 import com.jidesoft.swing.ListSearchable;
 import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
-import org.broad.igv.prefs.IGVPreferences;
 import org.broad.igv.prefs.PreferencesManager;
 import org.broad.igv.renderer.ColorScale;
 import org.broad.igv.renderer.ContinuousColorScale;
-import org.broad.igv.track.TrackType;
 import org.broad.igv.ui.IGVDialog;
 import org.broad.igv.ui.color.PaletteColorTable;
 import org.broad.igv.ui.legend.ContinuousLegendPanel;
 import org.broad.igv.ui.legend.DiscreteLegendPanel;
-import org.broad.igv.ui.legend.HeatmapLegendPanel;
 import org.broad.igv.ui.legend.LegendPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.util.List;
 
 public class SelectInfoFieldDialog extends IGVDialog {
@@ -39,6 +34,7 @@ public class SelectInfoFieldDialog extends IGVDialog {
     private JTextField typeLabel;
     private JTextField countLabel;
     private JPanel colorLegendPanel;
+    private JButton saveScaleButton;
     private LegendPanel numericalPanel;
 
     private String value;
@@ -85,35 +81,48 @@ public class SelectInfoFieldDialog extends IGVDialog {
         // call onCancel() on ESCAPE
         contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        possibleValueList.addListSelectionListener(e -> {
-            final VCFInfoHeaderLine selectedValue = possibleValueList.getSelectedValue();
-            if (selectedValue == null) {
-                idLabel.setText("");
-                countLabel.setText("");
-                typeLabel.setText("");
-                colorLegendPanel.removeAll();
-            } else {
-                String id = selectedValue.getID();
-                idLabel.setText(id);
-                countLabel.setText(selectedValue.isFixedCount() ? Integer.toString(selectedValue.getCount()) : selectedValue.getCountType().toString());
-                typeLabel.setText(selectedValue.getType().toString());
-                description.setText(selectedValue.getDescription());
-                colorLegendPanel.removeAll();
-                if (selectedValue.getType() == VCFHeaderLineType.Integer || selectedValue.getType() == VCFHeaderLineType.Float) {
-                    String prefString = PreferencesManager.getPreferences().get("VARIANT_INFO_" + id);
-                    ContinuousColorScale scale;
-                    if(prefString != null){
-                        scale = new ContinuousColorScale(prefString);
-                    } else {
-                        scale = new ContinuousColorScale(0,100,Color.GRAY, Color.magenta);
-                    }
-                    numericalPanel = new ContinuousLegendPanel(id, scale);
-                    colorLegendPanel.add(numericalPanel, BorderLayout.CENTER);
-                } else if (selectedValue.getType() == VCFHeaderLineType.Flag){
-                    PaletteColorTable colorTable = AttributeColorManager.getBooleanColorTable(AttributeColorManager.Type.INFO, id);
-                    numericalPanel = new DiscreteLegendPanel(colorTable);
-                    colorLegendPanel.add(numericalPanel, BorderLayout.CENTER);
+        possibleValueList.addListSelectionListener(e -> onSelectionChange());
+        //set this after the listeners are set up so that the list is correctly populated
+        inputField.setText(defaultValue);
+
+        saveScaleButton.setEnabled(false);
+        saveScaleButton.addActionListener(action -> onPersist());
+
+        colorLegendPanel.revalidate();
+        colorLegendPanel.repaint();
+    }
+
+    private void onSelectionChange() {
+        final VCFInfoHeaderLine selectedValue = possibleValueList.getSelectedValue();
+        if (selectedValue == null) {
+            idLabel.setText("");
+            countLabel.setText("");
+            typeLabel.setText("");
+            colorLegendPanel.removeAll();
+            saveScaleButton.setEnabled(false);
+        } else {
+            String id = selectedValue.getID();
+            idLabel.setText(id);
+            countLabel.setText(selectedValue.isFixedCount() ? Integer.toString(selectedValue.getCount()) : selectedValue.getCountType().toString());
+            typeLabel.setText(selectedValue.getType().toString());
+            description.setText(selectedValue.getDescription());
+            colorLegendPanel.removeAll();
+            saveScaleButton.setEnabled(true);
+            if (selectedValue.getType() == VCFHeaderLineType.Integer || selectedValue.getType() == VCFHeaderLineType.Float) {
+                String prefString = PreferencesManager.getPreferences().get(getKey(id));
+                ContinuousColorScale scale;
+                if (prefString != null) {
+                    scale = new ContinuousColorScale(prefString);
                 } else {
+                    scale = new ContinuousColorScale(0, 100, Color.GRAY, Color.magenta);
+                }
+                numericalPanel = new ContinuousLegendPanel(id, scale);
+                colorLegendPanel.add(numericalPanel, BorderLayout.CENTER);
+            } else if (selectedValue.getType() == VCFHeaderLineType.Flag) {
+                PaletteColorTable colorTable = AttributeColorManager.getBooleanColorTable(AttributeColorManager.Type.INFO, id);
+                numericalPanel = new DiscreteLegendPanel(colorTable);
+                colorLegendPanel.add(numericalPanel, BorderLayout.CENTER);
+            } else {
 //                    VariantAttributeStats.Stats stats = VariantAttributeStats.getInstance().getStats(VariantAttributeStats.Type.INFO, selectedValue.getID());
 //                    PaletteColorTable colorTable = switch (stats){
 //                        case VariantAttributeStats.Stats.Discrete discrete -> {
@@ -125,23 +134,33 @@ public class SelectInfoFieldDialog extends IGVDialog {
 //                        }
 //                        default -> null;
 //                    };
-                    PaletteColorTable colorTable = AttributeColorManager.getColorTable(AttributeColorManager.Type.INFO, id);
-                    numericalPanel = new DiscreteLegendPanel(colorTable);
-                    colorLegendPanel.add(numericalPanel, BorderLayout.CENTER);
-                }
+                PaletteColorTable colorTable = AttributeColorManager.getColorTable(AttributeColorManager.Type.INFO, id);
+                numericalPanel = new DiscreteLegendPanel(colorTable);
+                colorLegendPanel.add(numericalPanel, BorderLayout.CENTER);
             }
+        }
+        colorLegendPanel.add(saveScaleButton, BorderLayout.EAST);b nv
+        updateValues();
+    }
 
-            //set this after the listeners are set up so that the list is correctly populated
-            inputField.setText(defaultValue);
-            colorLegendPanel.revalidate();
-            colorLegendPanel.repaint();
-        });
+    private static String getKey(String id) {
+        return "VARIANT_INFO_" + id;
+    }
+
+    private void onPersist() {
+        if (value != null && !value.isBlank() && colorScale != null) {
+            PreferencesManager.getPreferences().put(getKey(value), colorScale.asString());
+        }
     }
 
     private void onOK() {
+        updateValues();
+        dispose();
+    }
+
+    private void updateValues() {
         value = inputField.getText();
         colorScale = numericalPanel.getColorScale();
-        dispose();
     }
 
     private void onCancel() {
@@ -237,6 +256,10 @@ public class SelectInfoFieldDialog extends IGVDialog {
         colorLegendPanel.setLayout(new BorderLayout(0, 0));
         colorLegendPanel.setToolTipText("heatmap");
         splitPane2.setRightComponent(colorLegendPanel);
+        saveScaleButton = new JButton();
+        saveScaleButton.setText("Persist");
+        saveScaleButton.setToolTipText("Save the mapping between field and color for future sessions.");
+        colorLegendPanel.add(saveScaleButton, BorderLayout.EAST);
         buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1, true, false));
         contentPane.add(buttonPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
@@ -255,5 +278,6 @@ public class SelectInfoFieldDialog extends IGVDialog {
         return contentPane;
     }
 
-    public record ColorResult(String value, ColorScale colors) {}
+    public record ColorResult(String value, ColorScale colors) {
+    }
 }

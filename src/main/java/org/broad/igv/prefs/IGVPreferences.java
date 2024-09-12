@@ -280,7 +280,7 @@ public class IGVPreferences {
             // Explicitly setting removes override
             overrideKeys.remove(key);
 
-            if (value == null || value.trim().length() == 0) {
+            if (value == null || value.trim().isEmpty()) {
                 userPreferences.remove(key);
             } else {
                 userPreferences.put(key, value);
@@ -297,7 +297,7 @@ public class IGVPreferences {
 
     public void putAll(Map<String, String> updatedPrefs) {
         for (Map.Entry<String, String> entry : updatedPrefs.entrySet()) {
-            if (entry.getValue() == null || entry.getValue().trim().length() == 0) {
+            if (entry.getValue() == null || entry.getValue().trim().isEmpty()) {
                 remove(entry.getKey());
             } else {
                 put(entry.getKey(), entry.getValue());
