@@ -36,25 +36,13 @@ import java.util.Map;
  * @author jrobinso
  */
 public class ColorScaleFactory {
-
-    static Map<String, ColorScale> colorScaleMap = new HashMap<>();
-
-
-    public static synchronized ColorScale getScaleFromString(String string) {
-
-        ColorScale cs = colorScaleMap.get(string);
-        if (cs == null) {
-
-            String[] tokens = string.split(";");
-            if (tokens[0].trim().equals(ContinuousColorScale.serializedClassName)) {
-                cs = new ContinuousColorScale(string);
-            } else if (tokens[0].trim().equals(MappedColorScale.serializationClassId)) {
-                cs = new MappedColorScale(string);
-            } else {
-                throw new RuntimeException("Illegal ColorScale: " + string);
-            }
-        }
-        return cs;
+    public static ColorScale getScaleFromString(String string) {
+        String[] tokens = string.split(";");
+        String trimmed = tokens[0].trim();
+        return switch (trimmed){
+            case ContinuousColorScale.serializedClassName -> new ContinuousColorScale(string);
+            case MappedColorScale.serializationClassId -> new MappedColorScale(string);
+            default -> throw new RuntimeException("Illegal ColorScale: " + string);
+        };
     }
-
 }

@@ -60,7 +60,7 @@ public class MappedColorScaleTest {
     @Test
     public void testSerialization() {
 
-        HashMap<String, Color> colorMap = new HashMap();
+        HashMap<String, Color> colorMap = new HashMap<>();
         colorMap.put("abc", Color.black);
         colorMap.put("def", Color.blue);
         colorMap.put("ghi", Color.red);

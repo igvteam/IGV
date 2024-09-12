@@ -50,7 +50,7 @@ public class ContinuousColorScale extends AbstractColorScale {
      * the class name, but that would invalidate serialized instances if the
      * name was ever changed.
      */
-    public static String serializedClassName = "ContinuousColorScale";
+    public static final String serializedClassName = "ContinuousColorScale";
     private final boolean useDoubleGradient;
     private double negEnd;
     private double posEnd;

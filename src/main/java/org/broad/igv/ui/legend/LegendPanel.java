@@ -54,7 +54,7 @@ abstract public class LegendPanel extends JPanel {
      */
     public LegendPanel() {
 
-        MouseInputListener mouseListener = new IGVMouseInputAdapter() {
+        addMouseListener(new IGVMouseInputAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
                 LegendPanel.this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -64,8 +64,7 @@ abstract public class LegendPanel extends JPanel {
             public void igvMouseClicked(MouseEvent e) {
                 edit();
             }
-        };
-        addMouseListener(mouseListener);
+        });
 
         UIUtilities.invokeOnEventThread(() -> LegendPanel.this.setToolTipText(UIConstants.CLICK_ITEM_TO_EDIT_TOOLTIP));
     }

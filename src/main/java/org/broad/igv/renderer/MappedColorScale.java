@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public class MappedColorScale extends AbstractColorScale {
 
-    public static String serializationClassId = "MappedColorScale";
+    public static final String serializationClassId = "MappedColorScale";
     final Map<String, Color> colorMap = new LinkedHashMap<>();
 
     /**
