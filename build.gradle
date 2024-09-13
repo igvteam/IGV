@@ -104,6 +104,7 @@ configurations {
         exclude group: 'xalan', module: 'serializer'
         exclude group: 'xalan', module: 'xalan'
 
+        exclude group: 'jdom', module: 'jdom'
 
         // Amazon deps exclusions
         //exclude group: 'software.amazon', module: 'flow'

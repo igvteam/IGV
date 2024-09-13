@@ -28,8 +28,8 @@ public class PreferencesManager implements IGVEventObserver {
     public static final String TAB_KEY = "#";
 
     private static List<PreferenceGroup> preferenceGroupList;
-    private static Logger log = LogManager.getLogger(PreferencesManager.class);
-    private static Map<String, IGVPreferences> preferencesMap = Collections.synchronizedMap(new HashMap<>());
+    private static final Logger log = LogManager.getLogger(PreferencesManager.class);
+    private static final Map<String, IGVPreferences> preferencesMap = Collections.synchronizedMap(new HashMap<>());
     private static Map<String, String> genericDefaults;
 
     private static String prefFile;  // User preferences file
@@ -393,15 +393,7 @@ public class PreferencesManager implements IGVEventObserver {
         }
     }
 
-    static class KeyValue {
-        String key;
-        String value;
-
-        public KeyValue(String key, String value) {
-            this.key = key;
-            this.value = value;
-        }
-    }
+    record KeyValue(String key, String value) {}
 
     static class Preference {
 
@@ -454,9 +446,9 @@ public class PreferencesManager implements IGVEventObserver {
 
     static class PreferenceGroup {
 
-        String tabLabel;
-        String category;
-        List<Preference> preferences;
+        final String tabLabel;
+        final String category;
+        final List<Preference> preferences;
 
         public PreferenceGroup(String tabLabel, String category, List<Preference> preferences) {
             this.tabLabel = tabLabel;

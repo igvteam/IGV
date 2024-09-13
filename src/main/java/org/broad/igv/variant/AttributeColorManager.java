@@ -1,19 +1,23 @@
 package org.broad.igv.variant;
 
+import org.broad.igv.prefs.Constants;
+import org.broad.igv.prefs.IGVPreferences;
+import org.broad.igv.prefs.PreferencesManager;
 import org.broad.igv.renderer.ColorScale;
-import org.broad.igv.ui.color.ColorTable;
+import org.broad.igv.renderer.ColorScaleFactory;
 import org.broad.igv.ui.color.ColorUtilities;
 import org.broad.igv.ui.color.PaletteColorTable;
 
 import java.awt.*;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class AttributeColorManager {
 
     private static final Map<Key, ColorScale> attributes = new TreeMap<>();
+    public static final Map<String, ColorScale> activeColorScalesMap = Collections.synchronizedMap(new HashMap<>());
+    public static final String VARIANT_INFO_PREFERENCE_KEY = "VARIANT_INFO_";
+    public static final String VARIANT_FORMAT_PREFERENCE_KEY = "VARIANT_FORMAT_";
 
     public static PaletteColorTable DEFAULT_BOOLEAN_COLORS = new PaletteColorTable(Color.GRAY);
     static {
@@ -21,12 +25,32 @@ public class AttributeColorManager {
         DEFAULT_BOOLEAN_COLORS.put("false", Color.RED);
     }
 
+    /**
+     * get the key name for the preferences file for a given color scale
+     * @param type
+     * @param id
+     * @return
+     */
+    static String getPreferencesKey(Type type, String id) {
+        return switch(type) {
+            case INFO -> VARIANT_INFO_PREFERENCE_KEY;
+            case FORMAT -> VARIANT_FORMAT_PREFERENCE_KEY;
+        } + id;
+        
+    }
+
     public enum Type{
         INFO, FORMAT
     }
 
-    private record Key(Type type, String name) implements Comparable<Key> {
 
+
+    public record Key(Type type, String name) implements Comparable<Key> {
+        public Key {
+            Objects.requireNonNull(type);
+            Objects.requireNonNull(name);
+        }
+    
         final static Comparator<Key> COMPARATOR = Comparator.comparing(Key::type)
                 .thenComparing(Key::name);
 
@@ -40,8 +64,65 @@ public class AttributeColorManager {
         return (PaletteColorTable) attributes.computeIfAbsent(new Key(type, id), k -> DEFAULT_BOOLEAN_COLORS);
     }
 
-    public static PaletteColorTable getColorTable(Type type, String id){
-        return (PaletteColorTable) attributes.computeIfAbsent(new Key(type, id), k -> new PaletteColorTable(ColorUtilities.getPalette("Set 1")));
+    private static String getDefaultScaleString(ColorScaleType type) {
+        IGVPreferences preferences = PreferencesManager.getPreferences();
+        return switch( type ){
+            case CONTINUOUS -> preferences.get(Constants.DEFAULT_CONTINUOUS_COLOR_SCALE);
+            case DISCRETE -> preferences.get(Constants.DEFAULT_DISCRETE_COLOR_SCALE);
+            case FLAG -> preferences.get(Constants.DEFAULT_BOOLEAN_COLOR_SCALE);
+        };
+    }
+
+    public enum ColorScaleType {
+        CONTINUOUS, DISCRETE, FLAG;
+    }
+    
+    /**
+     *  Get the scale for the given 
+     *  1. check for a saved scale
+     *  2. check for a scale from preferences
+     *  3. get the default scale for the value type
+     *   
+     * @param type
+     * @param id
+     * @param colorScaleType
+     * @return
+     */
+    public static ColorScale getColorTable(Type type, String id, ColorScaleType colorScaleType){
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(colorScaleType);
+        Objects.requireNonNull(id);
+
+        return attributes.computeIfAbsent(new Key(type, id), key -> {
+            String preferenceString = PreferencesManager.getPreferences().get(
+                    getPreferencesKey(key.type(), key.name()),
+                    getDefaultScaleString(colorScaleType));
+            return ColorScaleFactory.getScaleFromString(preferenceString);
+        });
+    }
+
+    public static void putColorTable(Type type, String id, ColorScale colorScale) {
+        attributes.put(new Key(type, id), colorScale);
+    }
+
+    public static void putColorTable(Key key, ColorScale colorScale){
+        attributes.put(key, colorScale);
+    }
+
+    public static void remove(Key key) {
+        attributes.remove(key);
+    }
+
+    public static Key preferenceIdToKey(String id){
+        if(id.startsWith(VARIANT_INFO_PREFERENCE_KEY)){
+            String name = id.substring(VARIANT_INFO_PREFERENCE_KEY.length());
+            return new Key(Type.INFO, name);
+        } else if(id.startsWith(VARIANT_FORMAT_PREFERENCE_KEY)){
+            String name = id.substring(VARIANT_FORMAT_PREFERENCE_KEY.length());
+            return new Key(Type.FORMAT, name);
+        } else {
+            throw new IllegalArgumentException("Can't convert attribute id to key: " + id);
+        }
     }
 
     static {

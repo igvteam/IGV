@@ -41,9 +41,6 @@ import org.broad.igv.ui.util.UIUtilities;
 import javax.swing.*;
 import java.awt.*;
 import java.text.DecimalFormat;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.function.Consumer;
 
 /**
  * @author eflakes
@@ -51,7 +48,6 @@ import java.util.function.Consumer;
 public class ContinuousLegendPanel extends LegendPanel {
 
     private final String name;
-    private final Set<Consumer<ContinuousColorScale>> changeListeners = new LinkedHashSet<>();
 
     protected ContinuousColorScale colorScale;
 
@@ -113,10 +109,6 @@ public class ContinuousLegendPanel extends LegendPanel {
                 IGV.getInstance().resetStatusMessage();
             }
         });
-    }
-
-    public void addChangeListener(Consumer<ContinuousColorScale> listener) {
-        changeListeners.add(listener);
     }
 
     protected void paintLegend(Graphics2D g) {

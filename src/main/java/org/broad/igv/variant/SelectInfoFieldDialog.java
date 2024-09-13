@@ -11,7 +11,6 @@ import org.broad.igv.prefs.Constants;
 import org.broad.igv.prefs.IGVPreferences;
 import org.broad.igv.prefs.PreferencesManager;
 import org.broad.igv.renderer.ColorScale;
-import org.broad.igv.renderer.ColorScaleFactory;
 import org.broad.igv.renderer.ContinuousColorScale;
 import org.broad.igv.ui.IGVDialog;
 import org.broad.igv.ui.color.PaletteColorTable;
@@ -22,11 +21,8 @@ import org.broad.igv.ui.legend.LegendPanel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.broad.igv.prefs.Constants.DEFAULT_BOOLEAN_COLOR_SCALE;
 
 public class SelectInfoFieldDialog extends IGVDialog {
     private JPanel contentPane;
@@ -47,8 +43,6 @@ public class SelectInfoFieldDialog extends IGVDialog {
 
     private String value;
     private ColorScale colorScale;
-
-    private final Map<String, ColorScale> colorScaleMap = new HashMap<>();
 
     public SelectInfoFieldDialog(Frame parent, String title, String defaultValue, List<VCFInfoHeaderLine> possibleValues) {
         super(parent, title, true);
@@ -102,6 +96,14 @@ public class SelectInfoFieldDialog extends IGVDialog {
         colorLegendPanel.repaint();
     }
 
+    private static AttributeColorManager.ColorScaleType headerLineToDisplayType(VCFHeaderLineType type) {
+        return switch( type ){
+            case Integer, Float -> AttributeColorManager.ColorScaleType.CONTINUOUS;
+            case String, Character -> AttributeColorManager.ColorScaleType.DISCRETE;
+            case Flag -> AttributeColorManager.ColorScaleType.FLAG;
+        };
+    }
+
     private void onSelectionChange() {
         final VCFInfoHeaderLine selectedValue = possibleValueList.getSelectedValue();
         if (selectedValue == null) {
@@ -111,6 +113,17 @@ public class SelectInfoFieldDialog extends IGVDialog {
         }
         colorLegendPanel.add(saveScaleButton, BorderLayout.EAST);
         updateValues();
+        colorLegendPanel.revalidate();
+        colorLegendPanel.repaint();
+    }
+
+    private void setToNoSelection() {
+        idLabel.setText("");
+        countLabel.setText("");
+        typeLabel.setText("");
+        description.setText("");
+        colorLegendPanel.removeAll();
+        saveScaleButton.setEnabled(false);
     }
 
     private void setSelectedValue(VCFInfoHeaderLine selectedValue) {
@@ -126,10 +139,7 @@ public class SelectInfoFieldDialog extends IGVDialog {
     }
 
     private LegendPanel getLegendPanel(String id, VCFHeaderLineType type) {
-        ColorScale scale = colorScaleMap.computeIfAbsent(id, key -> {
-            String preferenceString = PreferencesManager.getPreferences().get(getKey(key), getDefaultScale(type));
-            return ColorScaleFactory.getScaleFromString(preferenceString);
-        });
+        ColorScale scale = AttributeColorManager.getColorTable(AttributeColorManager.Type.INFO, id, headerLineToDisplayType(type));
         LegendPanel panel = switch(scale) {
             case ContinuousColorScale continuous -> new ContinuousLegendPanel(id, continuous);
             case PaletteColorTable discrete ->  new DiscreteLegendPanel(discrete);
@@ -139,14 +149,6 @@ public class SelectInfoFieldDialog extends IGVDialog {
         return panel;
     }
 
-    private String getDefaultScale(VCFHeaderLineType type) {
-        IGVPreferences preferences = PreferencesManager.getPreferences();
-        return switch( type ){
-            case Integer, Float -> preferences.get(Constants.DEFAULT_CONTINUOUS_COLOR_SCALE);
-            case String, Character -> preferences.get(Constants.DEFAULT_DISCRETE_COLOR_SCALE);
-            case Flag -> preferences.get(Constants.DEFAULT_BOOLEAN_COLOR_SCALE);
-        };
-    }
 
     /**
      *
@@ -157,22 +159,9 @@ public class SelectInfoFieldDialog extends IGVDialog {
         return headerLine.isFixedCount() ? Integer.toString(headerLine.getCount()) : headerLine.getCountType().toString();
     }
 
-    private void setToNoSelection() {
-        idLabel.setText("");
-        countLabel.setText("");
-        typeLabel.setText("");
-        description.setText("");
-        colorLegendPanel.removeAll();
-        saveScaleButton.setEnabled(false);
-    }
-
-    private static String getKey(String id) {
-        return "VARIANT_INFO_" + id;
-    }
-
     private void onPersist() {
         if (value != null && !value.isBlank() && colorScale != null) {
-            PreferencesManager.getPreferences().put(getKey(value), colorScale.asString());
+         //   PreferencesManager.updateAll( Map.of(AttributeColorManager.getPreferencesKey(AttributeColorManager.Type.INFO, value), colorScale.asString()););
         }
     }
 

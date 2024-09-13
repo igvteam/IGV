@@ -12,11 +12,13 @@ import org.broad.igv.ui.color.ColorSwatch;
 import org.broad.igv.ui.color.ColorUtilities;
 import org.broad.igv.ui.color.PaletteColorTable;
 import org.broad.igv.ui.legend.ContinuousLegendPanel;
+import org.broad.igv.ui.legend.DiscreteLegendPanel;
 import org.broad.igv.ui.legend.LegendPanel;
 import org.broad.igv.ui.util.FileDialogUtils;
 import org.broad.igv.ui.util.MessageUtils;
 import org.broad.igv.ui.util.UIUtilities;
 import org.broad.igv.util.Utilities;
+import org.broad.igv.variant.AttributeColorManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -203,18 +205,11 @@ public class PreferencesEditor {
                     } else if (pref.getType().startsWith("colorScale")){
                         String scaleString = preferences.get(pref.getKey());
                         ColorScale scale = ColorScaleFactory.getScaleFromString(scaleString);
-                        LegendPanel legend = null;
-                        if(scale instanceof ContinuousColorScale continuousColorScale){
-                            ContinuousLegendPanel contLegend = new ContinuousLegendPanel(pref.getLabel(), continuousColorScale);
-                            contLegend.addChangeListener(cs -> updatedPrefs.put(pref.getKey(), cs.asString()));
-                            legend = contLegend;
-                        }
+                        LegendPanel legend = getLegendPanel(pref, scale, updatedPrefs);
                         JLabel label = new JLabel(pref.getLabel());
 
                         grid.addLayoutComponent(label, new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(3, 5, 2, 3), 2, 2));
-                        if( legend != null) {
-                            grid.addLayoutComponent(legend, new GridBagConstraints(1, row, 100, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(3, 2, 2, 5), 2, 2));
-                        }
+                        grid.addLayoutComponent(legend, new GridBagConstraints(1, row, 100, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(3, 2, 2, 5), 2, 2));
                         group.add(label);
                         group.add(legend);
                     } else if (pref.getType().startsWith("color")) {
@@ -389,6 +384,16 @@ public class PreferencesEditor {
 
 
         panel.add(saveCancelPanel, BorderLayout.SOUTH);
+    }
+
+    private static LegendPanel getLegendPanel(PreferencesManager.Preference pref, ColorScale scale, Map<String, String> updatedPrefs) {
+        LegendPanel legend = switch (scale) {
+            case ContinuousColorScale continuousColorScale -> new ContinuousLegendPanel(pref.getLabel(), continuousColorScale);
+            case PaletteColorTable discreteScale -> new DiscreteLegendPanel(discreteScale) ;
+            default -> throw new IllegalStateException("No display avaialable for ColorScale:" + scale);
+        };
+        legend.addChangeListener(cs -> updatedPrefs.put(pref.getKey(), cs.asString()));
+        return legend;
     }
 
     private static void saveAction(Map<String, Map<String, String>> updatedPreferencesMap) {

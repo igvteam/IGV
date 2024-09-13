@@ -34,6 +34,7 @@ package org.broad.igv.ui.legend;
 
 import org.broad.igv.prefs.PreferencesManager;
 import org.broad.igv.renderer.ColorScale;
+import org.broad.igv.renderer.ContinuousColorScale;
 import org.broad.igv.ui.IGV;
 import org.broad.igv.ui.UIConstants;
 import org.broad.igv.ui.util.IGVMouseInputAdapter;
@@ -43,11 +44,16 @@ import javax.swing.*;
 import javax.swing.event.MouseInputListener;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * @author jrobinso
  */
 abstract public class LegendPanel extends JPanel {
+
+    protected final Set<Consumer<ContinuousColorScale>> changeListeners = new LinkedHashSet<>();
 
     /**
      * Constructs ...
@@ -93,6 +99,10 @@ abstract public class LegendPanel extends JPanel {
         }
         paintLegend((Graphics2D)g);
 
+    }
+
+    public void addChangeListener(Consumer<ContinuousColorScale> listener) {
+        changeListeners.add(listener);
     }
 
     abstract protected void paintLegend(Graphics2D g);

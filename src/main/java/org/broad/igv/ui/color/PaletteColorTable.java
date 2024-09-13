@@ -108,28 +108,31 @@ public class PaletteColorTable extends ColorTable {
     }
 
     public PaletteColorTable(String string){
+        try {
+            String[] tokens = Globals.semicolonPattern.split(string);
+            int leadingTokens = 1;
+            if (tokens.length >= leadingTokens + 1 && tokens[leadingTokens].startsWith(DEFAULT_KEY)) {
+                String[] split = Globals.equalPattern.split(tokens[1]);
+                defaultColor = ColorUtilities.stringToColor(split[1]);
+                leadingTokens++;
+            } else {
+                defaultColor = null;
+            }
 
-        String[] tokens = Globals.semicolonPattern.split(string);
-        int leadingTokens = 1;
-        if(tokens.length >= leadingTokens+1 && tokens[leadingTokens].startsWith(DEFAULT_KEY)){
-            String[] split = Globals.equalPattern.split(tokens[1]);
-            defaultColor = ColorUtilities.stringToColor(split[1]);
-            leadingTokens++;
-        } else {
-            defaultColor = null;
-        }
+            if (tokens.length >= leadingTokens + 1 && tokens[leadingTokens].startsWith(PALETTE_KEY)) {
+                String[] split = Globals.equalPattern.split(tokens[1]);
+                palette = ColorUtilities.getPalette(split[1]);
+                leadingTokens++;
+            } else {
+                palette = null;
+            }
 
-        if(tokens.length >= leadingTokens+1 && tokens[leadingTokens].startsWith(PALETTE_KEY)){
-            String[] split = Globals.equalPattern.split(tokens[1]);
-            palette = ColorUtilities.getPalette(split[1]);
-            leadingTokens++;
-        } else {
-            palette = null;
-        }
-
-        for(int i = leadingTokens; i< tokens.length; i++){
-            String[] kv = Globals.equalPattern.split(tokens[i]);
-            colorMap.put(kv[0], ColorUtilities.stringToColor(kv[1]));
+            for (int i = leadingTokens; i < tokens.length; i++) {
+                String[] kv = Globals.equalPattern.split(tokens[i]);
+                colorMap.put(kv[0], ColorUtilities.stringToColor(kv[1]));
+            }
+        } catch( Exception e){
+            throw new IllegalArgumentException("Could not parse palette color string: " + string, e);
         }
     }
 
@@ -139,6 +142,10 @@ public class PaletteColorTable extends ColorTable {
 
     public Set<Map.Entry<String, Color>> entrySet() {
         return colorMap.entrySet();
+    }
+
+    public ColorPalette getPalette() {
+        return palette;
     }
 
     public String getMapAsString() {

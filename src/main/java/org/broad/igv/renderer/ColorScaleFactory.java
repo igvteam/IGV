@@ -29,6 +29,7 @@
  */
 package org.broad.igv.renderer;
 
+import org.broad.igv.Globals;
 import org.broad.igv.ui.color.PaletteColorTable;
 
 import java.util.HashMap;
@@ -39,7 +40,7 @@ import java.util.Map;
  */
 public class ColorScaleFactory {
     public static ColorScale getScaleFromString(String string) {
-        String[] tokens = string.split(";");
+        String[] tokens = Globals.semicolonPattern.split(string);
         String trimmed = tokens[0].trim();
         return switch (trimmed){
             case ContinuousColorScale.serializedClassName -> new ContinuousColorScale(string);
