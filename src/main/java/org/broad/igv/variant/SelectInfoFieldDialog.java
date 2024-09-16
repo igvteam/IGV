@@ -7,9 +7,6 @@ import com.jidesoft.swing.ListSearchable;
 import htsjdk.variant.vcf.VCFCompoundHeaderLine;
 import htsjdk.variant.vcf.VCFHeaderLineType;
 import htsjdk.variant.vcf.VCFInfoHeaderLine;
-import org.broad.igv.prefs.Constants;
-import org.broad.igv.prefs.IGVPreferences;
-import org.broad.igv.prefs.PreferencesManager;
 import org.broad.igv.renderer.ColorScale;
 import org.broad.igv.renderer.ContinuousColorScale;
 import org.broad.igv.ui.IGVDialog;
@@ -22,7 +19,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 public class SelectInfoFieldDialog extends IGVDialog {
     private JPanel contentPane;
@@ -177,15 +174,22 @@ public class SelectInfoFieldDialog extends IGVDialog {
 
     private void onCancel() {
         value = null;
+        colorScale = null;
         dispose();
     }
 
-    public static ColorResult showValueChooseDialog(Frame parent, String title, String defaultValue, List<VCFInfoHeaderLine> choices) {
+    public static Optional<ColorResult> showValueChooseDialog(Frame parent, String title, String defaultValue, List<VCFInfoHeaderLine> choices) {
         SelectInfoFieldDialog dialog = new SelectInfoFieldDialog(parent, title, defaultValue, choices);
         dialog.pack();
         dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
-        return new ColorResult(dialog.value, dialog.colorScale);
+        return dialog.getResult();
+    }
+
+    private Optional<ColorResult> getResult() {
+            return value == null || colorScale == null
+                    ? Optional.empty()
+                    : Optional.of(new ColorResult(value, colorScale));
     }
 
     public static void main(String[] args) {

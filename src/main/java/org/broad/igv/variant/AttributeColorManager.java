@@ -36,7 +36,6 @@ public class AttributeColorManager {
             case INFO -> VARIANT_INFO_PREFERENCE_KEY;
             case FORMAT -> VARIANT_FORMAT_PREFERENCE_KEY;
         } + id;
-        
     }
 
     public enum Type{
@@ -126,7 +125,6 @@ public class AttributeColorManager {
     }
 
     static {
-
         PaletteColorTable svtypeColors = new PaletteColorTable(ColorUtilities.getPalette("Pastel 1"));
         //from VCF 4.5 spec section 1.4.5
         List.of("DEL",
@@ -144,8 +142,6 @@ public class AttributeColorManager {
         PaletteColorTable defaultBooleanColors = new PaletteColorTable(Color.GRAY);
         defaultBooleanColors.put("true", Color.BLACK);
         defaultBooleanColors.put("false", Color.RED);
-
-
     }
 
 

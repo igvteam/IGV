@@ -38,6 +38,7 @@ import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -144,7 +145,7 @@ public class MessageUtils {
     }
 
     ;
-    public static SelectInfoFieldDialog.ColorResult showInputDialog(String message, String defaultValue, List<VCFInfoHeaderLine> valueOptions) {
+    public static Optional<SelectInfoFieldDialog.ColorResult> showInputDialog(String message, String defaultValue, List<VCFInfoHeaderLine> valueOptions) {
 
         final Frame parent = IGV.hasInstance() ? IGV.getInstance().getMainFrame() : null;
         //Pad message with spaces so it's as wide as the defaultValue
