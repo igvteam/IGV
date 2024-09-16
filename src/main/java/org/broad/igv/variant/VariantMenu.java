@@ -197,18 +197,19 @@ public class VariantMenu extends IGVPopupMenu {
             item.setText(title + " (" + prior.value() + ")");
         }
         item.addActionListener(aEvt -> {
-            track.setSiteColorMode(VariantTrack.ColorMode.INFO_FIELD);
             final Object header = track.getHeader();
             final SelectInfoFieldDialog.ColorResult priorValue = track.getColorByInfoField();
             final String priorTagValue = priorValue != null ? priorValue.value() : null;
             final SelectInfoFieldDialog.ColorResult tag;
             if(header instanceof VCFHeader vcfHeader){
                 final List<VCFInfoHeaderLine> infoHeaderLines = new ArrayList<>(vcfHeader.getInfoHeaderLines());
-                tag = MessageUtils.showInputDialog("Enter Info Field", priorTagValue, infoHeaderLines);
+                tag = MessageUtils.showInputDialog("Enter Info Field", priorTagValue, infoHeaderLines).orElse(null);
             } else {
                 tag = new SelectInfoFieldDialog.ColorResult(MessageUtils.showInputDialog("Enter Info Field", priorTagValue), new PaletteColorTable());
             }
             if (tag != null && tag.value() != null && !tag.value().isBlank()) {
+                //only make a change if we actually have a new value
+                track.setSiteColorMode(VariantTrack.ColorMode.INFO_FIELD);
                 track.setSiteColorMode(VariantTrack.ColorMode.INFO_FIELD);
                 track.setColorByInfoField(tag);
                 track.repaint();
