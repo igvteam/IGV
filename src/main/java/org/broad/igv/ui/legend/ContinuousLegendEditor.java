@@ -87,7 +87,6 @@ public class ContinuousLegendEditor extends IGVDialog {
     }
 
     private boolean updateValues() {
-
         try {
             double negStart = 0;
             double negEnd = 0;

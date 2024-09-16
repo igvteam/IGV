@@ -94,7 +94,7 @@ public class SelectInfoFieldDialog extends IGVDialog {
     }
 
     private static AttributeColorManager.ColorScaleType headerLineToDisplayType(VCFHeaderLineType type) {
-        return switch( type ){
+        return switch (type) {
             case Integer, Float -> AttributeColorManager.ColorScaleType.CONTINUOUS;
             case String, Character -> AttributeColorManager.ColorScaleType.DISCRETE;
             case Flag -> AttributeColorManager.ColorScaleType.FLAG;
@@ -137,9 +137,9 @@ public class SelectInfoFieldDialog extends IGVDialog {
 
     private LegendPanel getLegendPanel(String id, VCFHeaderLineType type) {
         ColorScale scale = AttributeColorManager.getColorTable(AttributeColorManager.Type.INFO, id, headerLineToDisplayType(type));
-        LegendPanel panel = switch(scale) {
+        LegendPanel panel = switch (scale) {
             case ContinuousColorScale continuous -> new ContinuousLegendPanel(id, continuous);
-            case PaletteColorTable discrete ->  new DiscreteLegendPanel(discrete);
+            case PaletteColorTable discrete -> new DiscreteLegendPanel(discrete);
             default -> throw new IllegalArgumentException("Unexpected ColorScale type " + scale.asString());
         };
 
@@ -148,7 +148,6 @@ public class SelectInfoFieldDialog extends IGVDialog {
 
 
     /**
-     *
      * @param headerLine
      * @return
      */
@@ -158,7 +157,7 @@ public class SelectInfoFieldDialog extends IGVDialog {
 
     private void onPersist() {
         if (value != null && !value.isBlank() && colorScale != null) {
-         //   PreferencesManager.updateAll( Map.of(AttributeColorManager.getPreferencesKey(AttributeColorManager.Type.INFO, value), colorScale.asString()););
+            //   PreferencesManager.updateAll( Map.of(AttributeColorManager.getPreferencesKey(AttributeColorManager.Type.INFO, value), colorScale.asString()););
         }
     }
 
@@ -187,9 +186,9 @@ public class SelectInfoFieldDialog extends IGVDialog {
     }
 
     private Optional<ColorResult> getResult() {
-            return value == null || colorScale == null
-                    ? Optional.empty()
-                    : Optional.of(new ColorResult(value, colorScale));
+        return value == null || colorScale == null
+                ? Optional.empty()
+                : Optional.of(new ColorResult(value, colorScale));
     }
 
     public static void main(String[] args) {
@@ -273,6 +272,7 @@ public class SelectInfoFieldDialog extends IGVDialog {
         colorLegendPanel.setToolTipText("heatmap");
         splitPane2.setRightComponent(colorLegendPanel);
         saveScaleButton = new JButton();
+        saveScaleButton.setEnabled(false);
         saveScaleButton.setText("Persist");
         saveScaleButton.setToolTipText("Save the mapping between field and color for future sessions.");
         colorLegendPanel.add(saveScaleButton, BorderLayout.EAST);

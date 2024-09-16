@@ -29,6 +29,10 @@ public class ColorSwatch extends JPanel {
         });
     }
 
+    public Color getSelectedColor() {
+        return selectedColor;
+    }
+
     public void setSelectedColor(Color selectedColor) {
         this.selectedColor = selectedColor;
         this.setBackground(selectedColor);

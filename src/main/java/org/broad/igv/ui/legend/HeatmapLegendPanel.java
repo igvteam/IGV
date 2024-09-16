@@ -45,7 +45,6 @@ import javax.swing.*;
  * @author eflakes
  */
 public class HeatmapLegendPanel extends ContinuousLegendPanel {
-
     private final TrackType type;
 
     public HeatmapLegendPanel(TrackType type) {
@@ -69,6 +68,39 @@ public class HeatmapLegendPanel extends ContinuousLegendPanel {
         PreferencesManager.getPreferences().setColorScale(type, colorScale);
         //ColorScaleFactory.clearCache();
         repaint();
+    }
+
+    /**
+     * Method description
+     */
+    public void edit() {
+
+        UIUtilities.invokeOnEventThread(() -> {
+
+            IGV.getInstance().setStatusBarMessage("Setting view properties...");
+
+            ContinuousLegendEditor dialog = new ContinuousLegendEditor(IGV.getInstance().getMainFrame(), true, colorScale);
+
+            dialog.setTitle("Heatmap Preferences");
+            dialog.setVisible(true);
+
+
+            if (dialog.isCanceled()) {
+                IGV.getInstance().resetStatusMessage();
+                return;
+            }
+
+            colorScale = dialog.getColorScheme();
+            changeListeners.forEach(c -> c.accept(colorScale));
+            //PreferencesManager.getPreferences().setColorScale(type, colorScale);
+            IGV.getInstance().repaint();
+            try {
+                reloadPreferences();
+            } finally {
+                UIUtilities.invokeOnEventThread(() -> SwingUtilities.getWindowAncestor(this).toFront());
+                IGV.getInstance().resetStatusMessage();
+            }
+        });
     }
 
 }

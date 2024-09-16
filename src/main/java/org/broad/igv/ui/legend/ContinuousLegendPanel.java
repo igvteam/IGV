@@ -78,6 +78,14 @@ public class ContinuousLegendPanel extends LegendPanel {
         repaint();
     }
 
+
+    public void updateColorScale(ContinuousColorScale scale){
+        colorScale = scale;
+        changeListeners.forEach(c -> c.accept(colorScale));
+        repaint();
+    }
+
+
     /**
      * Method description
      */
@@ -87,9 +95,10 @@ public class ContinuousLegendPanel extends LegendPanel {
 
             IGV.getInstance().setStatusBarMessage("Setting view properties...");
 
-            ContinuousLegendEditor dialog = new ContinuousLegendEditor(IGV.getInstance().getMainFrame(), true, colorScale);
+            NewContinuousLegendEditor dialog = new NewContinuousLegendEditor(IGV.getInstance().getMainFrame(), true, colorScale);
 
             dialog.setTitle(name + " Preferences");
+            dialog.pack();
             dialog.setVisible(true);
 
 
@@ -98,7 +107,7 @@ public class ContinuousLegendPanel extends LegendPanel {
                 return;
             }
 
-            colorScale = dialog.getColorScheme();
+            colorScale = dialog.getColorScale();
             changeListeners.forEach(c -> c.accept(colorScale));
             //PreferencesManager.getPreferences().setColorScale(type, colorScale);
             IGV.getInstance().repaint();
@@ -115,8 +124,8 @@ public class ContinuousLegendPanel extends LegendPanel {
 
         final DecimalFormat formatter = new DecimalFormat("0.0");
 
-        final Font font = FontManager.getFont(10);
-        g.setFont(font);
+//        final Font font = FontManager.getFont(10);
+//        g.setFont(font);
 
         final int textHeight = g.getFontMetrics().getHeight();
         final int compactHeight = textHeight * 2;
